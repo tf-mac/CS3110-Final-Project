@@ -28,12 +28,12 @@ let parse_value_defn x = match x with
 
 let add_type x = user_defined_types := x :: !user_defined_types
 
-let print_state string v =
-  print_string (string ^ "\n\n"); v
+let print_state string =
+  print_string (string ^ "\n"); read_line ()
           
 let rec read_value_defn line = match parse_value_defn line with
   | Empty -> []
-  | Malformed -> read_line () |> read_value_defn |> print_state "Invalid data types"
+  | Malformed -> print_state "Invalid data types" |> read_value_defn
   | Valid s -> s ::  read_value_defn (read_line ())
 
   let parse_constructor_defn line = line |> List.hd |> add_type;
@@ -44,20 +44,22 @@ let read_make line = [[]]
 
 let rec read_input line =
   if String.contains line ' ' = false 
-    then read_line () |> print_state "Invalid Type, must include ID" |> read_input 
+    then print_state "Invalid Type, must include ID" |> read_input 
 else if List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types = true
   then read_line () |> read_make
 else let input_list = String.split_on_char ' ' line in
 if input_list |> List.hd = "def"
-  then input_list |> List. tl |> parse_constructor_defn 
-  else read_line () |> print_state "Type does not exist" |> read_input 
+  then if List.length input_list = 2
+    then print_state "Invalid Type definition, must include ID" |> read_input 
+else input_list |> List. tl |> parse_constructor_defn 
+  else print_state "Type does not exist" |> read_input 
 
 
 (** [main ()] prompts for the script to start, then starts it. *)
 let main () =
   print_string "\n\nWelcome to the 3110 Database Command Line\n";
-  print_endline "Please describe the data you want to store. The commands are of the form:\nTypeName id\ntype valueName\n...\nend";
+  print_endline "Please describe the data you want to store. To define a custom dataframe, type:\ndef TypeName id\ntype valueName\n...\ntype valueName\n\n\n";
   read_line () |> read_input |> ignore
 
-(* Execute the game engine. *)
+(* Execute the CLI. *)
 let () = main ()
