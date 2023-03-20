@@ -60,23 +60,31 @@ let rec parse_value type_name line =
       |> parse_value type_name
   | _ -> line_list
 
-let read_make  = 
+let rec read_make type_name line =
+  match line with
+  | "" -> []
+  | s -> parse_value type_name line :: read_make type_name (read_line ())
 
 let rec read_input line =
   if String.contains line ' ' = false then
     print_state "Invalid Type, must include ID" |> read_input
-  else 
+  else
     let input_list = String.split_on_char ' ' line in
     if
-    List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
-    = true
-  then read_line () |> read_make (List.hd input_list)
-  else
-    if input_list |> List.hd = "def" then
+      List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
+      = true
+    then read_line () |> read_make (List.hd input_list)
+    else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
         print_state "Invalid Type definition, must include ID" |> read_input
       else input_list |> List.tl |> parse_constructor_defn
     else print_state "Type does not exist" |> read_input
+
+let start =
+  match read_line () with
+  | "" -> read_line () |> read_input |> ignore
+  | "quit" -> ()
+  | s -> s |> read_input |> ignore
 
 (** [main ()] prompts for the script to start, then starts it. *)
 let main () =
@@ -88,7 +96,7 @@ let main () =
     \   type valueName\n\
     \   ...\n\
     \   type valueName\n\n\n";
-  read_line () |> read_input |> ignore
+  start
 
 (* Execute the CLI. *)
 let () = main ()
