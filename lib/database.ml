@@ -15,7 +15,7 @@ type entry =
   | Int of int
   | Char of char
   | Bool of bool
-  | Id of (string * int)
+  | Id of (string * string)
 
 let entry_to_string ent =
   match ent with
@@ -24,7 +24,7 @@ let entry_to_string ent =
   | Int x -> string_of_int x
   | Char x -> String.make 1 x
   | Bool x -> string_of_bool x
-  | Id (a, b) -> a ^ "@" ^ string_of_int b
+  | Id (a, b) -> a ^ "@" ^ b
 
 module ListOfTupleTable :
   Table with type t = (int * entry list) list and type value = entry list =
