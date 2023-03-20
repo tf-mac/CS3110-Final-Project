@@ -1,4 +1,4 @@
 (executable
  (public_name Database)
  (name main)
- (libraries RelationalDatabase))
+ (libraries Database))
