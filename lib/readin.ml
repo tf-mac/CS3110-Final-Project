@@ -48,15 +48,15 @@ let parse_constructor_defn line =
   let table = Database.process_new_types (read_line () |> read_value_defn) in
   match data := Database.add_table !data table (List.hd line) with _ -> [ [] ]
 
-let rec parse_value type_name line =
+let rec parse_value type_name line : string =
   let line_list = String.split_on_char '=' line in
   let entry_id = List.hd line_list in
   let entry_value = line_list |> List.tl |> lst_to_string in
-  try Database.check_value !data type_name entry_id entry_value with
-  | Database.NoEntry ->
+  match Database.check_value !data type_name entry_id entry_value with
+  | exception Database.NoEntry ->
       print_state "   No entry of name '" ^ entry_id ^ "'\n"
       |> parse_value type_name
-  | Database.WrongType ->
+  | exception Database.WrongType ->
       print_state "   '" ^ entry_value ^ "' is not the correct type\n"
       |> parse_value type_name
   | _ -> ( match line_list with [ a; b ] -> b | _ -> raise Stack_overflow)
@@ -69,7 +69,7 @@ let add_entry new_row table =
 let rec read_make type_name line =
   match line with
   | "" -> []
-  | s -> parse_value type_name line :: read_make type_name (read_line ())
+  | s -> parse_value type_name line :: read_make type_name (print_state "   ")
 
 let rec make_entires type_name inputs = 
   match inputs with
