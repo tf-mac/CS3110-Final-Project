@@ -78,6 +78,10 @@ let rec make_entires type_name inputs =
 
 let rec read_input line =
   if line = "print" then print_string (Database.db_to_string !data)
+  else if List.hd (String.split_on_char ' ' line) = "save" then match String.split_on_char ' ' line with 
+  | [] -> print_endline "This shouldn't be possible yet somhow it happened..."; read_input (read_line () )
+  | _ :: [] -> print_endline "File name required to store"; read_input (read_line () )
+  | _ :: file :: _ -> print_endline ("Saving to " ^ file ^ "..."); let oc = Stdlib.open_out file in Stdlib.output_string oc (Database.db_to_string !data); Stdlib.flush oc; read_input (read_line ())
   else if String.contains line ' ' = false then
     print_state "Invalid Type, must include Type and ID\n" |> read_input
   else
