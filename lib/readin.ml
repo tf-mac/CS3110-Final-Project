@@ -45,58 +45,84 @@ let rec read_value_defn line =
 let parse_constructor_defn line =
   print_string "   ";
   line |> List.hd |> add_type;
-  let table = Database.process_new_types (read_line () |> read_value_defn) in
+  let table =
+    Database.process_new_types
+      ([ "string"; List.hd (List.tl line) ] :: (read_line () |> read_value_defn))
+  in
   match data := Database.add_table !data table (List.hd line) with _ -> [ [] ]
 
-let rec parse_value type_name line : string =
+let rec parse_value type_name line : string list =
   let line_list = String.split_on_char '=' line in
   let entry_id = List.hd line_list in
   let entry_value = line_list |> List.tl |> lst_to_string in
   match Database.check_value !data type_name entry_id entry_value with
-  | exception Database.NoEntry ->
-      print_state "   No entry of name '" ^ entry_id ^ "'\n"
-      |> parse_value type_name
   | exception Database.WrongType ->
       print_state "   '" ^ entry_value ^ "' is not the correct type\n"
       |> parse_value type_name
-  | _ -> ( match line_list with [ a; b ] -> b | _ -> raise Stack_overflow)
+  | _ -> ( match line_list with [ a; b ] -> [ b ] | _ -> raise Stack_overflow)
 
 let add_entry new_row table =
-  print_string ("Adding to " ^ table);
+  print_string ("Adding to " ^ table ^ "\n");
   match data := Database.add_entry table new_row !data with
   | _ -> print_string (Database.db_to_string !data)
 
 let rec read_make type_name line =
+  print_endline ("'" ^ line ^ "'");
   match line with
   | "" -> []
-  | s -> parse_value type_name line :: read_make type_name (print_state "   ")
+  | s -> (
+      match parse_value type_name line with
+      | exception Database.NoEntry ->
+          print_state "   No entry of that name\n   " |> read_make type_name
+      | x -> read_make type_name (print_state "   ") @ x)
 
-let rec make_entires type_name inputs = 
+let rec make_entires type_name inputs =
   match inputs with
   | [] -> []
   | a :: b -> parse_value type_name a :: make_entires type_name b
 
 let rec read_input line =
   if line = "print" then print_string (Database.db_to_string !data)
-  else if List.hd (String.split_on_char ' ' line) = "save" then match String.split_on_char ' ' line with 
-  | [] -> print_endline "This shouldn't be possible yet somhow it happened..."; read_input (read_line () )
-  | _ :: [] -> print_endline "File name required to store"; read_input (read_line () )
-  | _ :: file :: _ -> print_endline ("Saving to " ^ file ^ "..."); let oc = Stdlib.open_out file in Stdlib.output_string oc (Database.db_to_string !data); Stdlib.flush oc; read_input (read_line ())
+  else if List.hd (String.split_on_char ' ' line) = "save" then (
+    match String.split_on_char ' ' line with
+    | [] ->
+        print_endline "This shouldn't be possible yet somhow it happened...";
+        read_input (read_line ())
+    | [ _ ] ->
+        print_endline "File name required to store";
+        read_input (read_line ())
+    | _ :: file :: _ ->
+        print_endline ("Saving to " ^ file ^ "...");
+        let oc = Stdlib.open_out file in
+        Stdlib.output_string oc (Database.db_to_string !data);
+        Stdlib.flush oc;
+        read_input (read_line ()))
   else if String.contains line ' ' = false then
     print_state "Invalid Type, must include Type and ID\n" |> read_input
   else
     let input_list = String.split_on_char ' ' line in
     if List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
     then (
-      add_entry (make_entires (List.hd (input_list)) (List.tl input_list)) (List.hd (input_list));
+      add_entry
+        ((List.tl input_list |> lst_to_string)
+        :: read_make (List.hd input_list) (print_state "   "))
+        (List.hd input_list);
       read_line () |> read_input)
     else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
-        print_state "Invalid Type definition, must include Type and ID\n" |> read_input
+        print_state "Invalid Type definition, must include Type and ID\n"
+        |> read_input
       else
         match input_list |> List.tl |> parse_constructor_defn with
         | _ -> read_input (read_line ())
     else print_state "Type does not exist\n" |> read_input
+
+let rec process_commands input =
+  (match List.hd (String.split_on_char ' ' input) with
+  | "def" -> print_string ""
+  | "print" -> print_string (Database.db_to_string !data)
+  | _ -> print_endline "Unrecognized command, try help for a list of commands");
+  process_commands (read_line ())
 
 (** [main ()] prompts for the script to start, then starts it. *)
 let main () =

@@ -119,6 +119,7 @@ module Database = struct
         "Table:\t" ^ name ^ "\n" ^ T.table_to_string x ^ db_to_string xs
 
   let check_value (database : (string * T.t) list) tn eid ev =
+    print_endline ("EID: " ^ eid);
     match List.find (fun a -> match a with n, tt -> n = tn) database with
     | x -> (
         match x with
@@ -148,7 +149,9 @@ module Database = struct
                     | Some _ -> ())
                 | _ -> ())
             | _ -> raise Stack_overflow))
-    | exception Not_found -> (print_endline "Error in check value, no type found"); print_endline (db_to_string database)
+    | exception Not_found ->
+        print_endline "Error in check value, no type found";
+        print_endline (db_to_string database)
 
   let rec process_new_types inputs : entry list =
     match inputs with
