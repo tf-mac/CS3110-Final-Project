@@ -32,6 +32,9 @@ module ListOfTupleTable : sig
 end
 
 module Database : sig
+  exception NoEntry
+  exception WrongType
+
   module T = ListOfTupleTable
 
   val empty : 'a list
@@ -40,4 +43,7 @@ module Database : sig
   val get_table : 'a -> ('a * 'b) list -> 'a * 'b
   val get_reference : entry -> (string * T.t) list -> T.value
   val db_to_string : (string * T.t) list -> string
+  val check_value : (string * T.t) list -> string -> string -> string -> unit
+  val add_entry : string -> string list -> (string * T.t) list -> (string * T.t) list
+  val process_new_types : string list list -> entry list
 end

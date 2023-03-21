@@ -1,6 +1,6 @@
 open Database
 
-let data = Database.empty
+let data = ref Database.empty
 
 type input = Empty | Malformed | Valid of string list
 
@@ -45,37 +45,45 @@ let rec read_value_defn line =
 let parse_constructor_defn line =
   print_string "   ";
   line |> List.hd |> add_type;
-  line :: (read_line () |> read_value_defn)
+  let table = Database.process_new_types (read_line () |> read_value_defn) in
+  match data := (Database.add_table (!data) table (List.hd line)) with _ -> [[]]
 
 let rec parse_value type_name line =
   let line_list = String.split_on_char '=' line in
   let entry_id = List.hd line_list in
   let entry_value = line_list |> List.tl |> lst_to_string in
-  try Database.check_value data type_name entry_id entry_value with
-  | Database.NoEntry ->
+  match Database.check_value !data type_name entry_id entry_value with
+  | exception Database.NoEntry ->
       print_state "No entry of name '" ^ entry_id ^ "'\n"
       |> parse_value type_name
-  | Database.WrongType ->
+  | exception Database.WrongType ->
       print_state "'" ^ entry_value ^ "' is not the correct type\n"
       |> parse_value type_name
-  | _ -> line_list
+  | _ -> match line_list with |[a;b] -> b| _ -> raise Stack_overflow
 
-let read_make  = 
+let add_entry new_row table = match data := (Database.add_entry table new_row !data) with _ -> ()
+let rec read_make type_name line =
+  match line with
+  | "" -> []
+  | s -> parse_value type_name line :: read_make type_name (read_line ())
 
+
+  
+  
 let rec read_input line =
+  if line = "print" then print_string (Database.db_to_string !data)
+  else
   if String.contains line ' ' = false then
     print_state "Invalid Type, must include ID" |> read_input
-  else 
+  else
     let input_list = String.split_on_char ' ' line in
     if
-    List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
-    = true
-  then read_line () |> read_make (List.hd input_list)
-  else
-    if input_list |> List.hd = "def" then
+      List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
+    then let type_name = read_line () in add_entry (read_make type_name (List.hd input_list)) type_name; (read_line () |> read_input); 
+    else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
         print_state "Invalid Type definition, must include ID" |> read_input
-      else input_list |> List.tl |> parse_constructor_defn
+      else match input_list |> List.tl |> parse_constructor_defn with _ -> read_input (read_line ())
     else print_state "Type does not exist" |> read_input
 
 (** [main ()] prompts for the script to start, then starts it. *)
