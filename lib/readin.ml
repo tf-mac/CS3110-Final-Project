@@ -62,12 +62,19 @@ let rec parse_value type_name line =
   | _ -> ( match line_list with [ a; b ] -> b | _ -> raise Stack_overflow)
 
 let add_entry new_row table =
-  match data := Database.add_entry table new_row !data with _ -> ()
+  print_string ("Adding to " ^ table);
+  match data := Database.add_entry table new_row !data with
+  | _ -> print_string (Database.db_to_string !data)
 
 let rec read_make type_name line =
   match line with
   | "" -> []
-  | s -> parse_value type_name line :: read_make type_name (print_state "   ")
+  | s -> parse_value type_name line :: read_make type_name (read_line ())
+
+let rec make_entires type_name inputs = 
+  match inputs with
+  | [] -> []
+  | a :: b -> parse_value type_name a :: make_entires type_name b
 
 let rec read_input line =
   if line = "print" then print_string (Database.db_to_string !data)
@@ -77,13 +84,11 @@ let rec read_input line =
     let input_list = String.split_on_char ' ' line in
     if List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
     then (
-      let type_name = print_state "   " in
-      add_entry (List.hd input_list |> read_make type_name) type_name;
+      add_entry (make_entires (List.hd (input_list)) (List.tl input_list)) (List.hd (input_list));
       read_line () |> read_input)
     else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
-        print_state "Invalid Type definition, must include Type and ID\n"
-        |> read_input
+        print_state "Invalid Type definition, must include Type and ID\n" |> read_input
       else
         match input_list |> List.tl |> parse_constructor_defn with
         | _ -> read_input (read_line ())
