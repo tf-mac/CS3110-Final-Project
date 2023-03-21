@@ -67,7 +67,6 @@ let add_entry new_row table =
   | _ -> print_string (Database.db_to_string !data)
 
 let rec read_make type_name line =
-  print_endline ("'" ^ line ^ "'");
   match line with
   | "" -> []
   | s -> (
