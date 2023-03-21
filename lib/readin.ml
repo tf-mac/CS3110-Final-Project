@@ -52,12 +52,12 @@ let rec parse_value type_name line =
   let line_list = String.split_on_char '=' line in
   let entry_id = List.hd line_list in
   let entry_value = line_list |> List.tl |> lst_to_string in
-  match Database.check_value !data type_name entry_id entry_value with
-  | exception Database.NoEntry ->
-      print_state "No entry of name '" ^ entry_id ^ "'\n"
+  try Database.check_value !data type_name entry_id entry_value with
+  | Database.NoEntry ->
+      print_state "   No entry of name '" ^ entry_id ^ "'\n"
       |> parse_value type_name
-  | exception Database.WrongType ->
-      print_state "'" ^ entry_value ^ "' is not the correct type\n"
+  | Database.WrongType ->
+      print_state "   '" ^ entry_value ^ "' is not the correct type\n"
       |> parse_value type_name
   | _ -> ( match line_list with [ a; b ] -> b | _ -> raise Stack_overflow)
 
@@ -79,7 +79,7 @@ let rec make_entires type_name inputs =
 let rec read_input line =
   if line = "print" then print_string (Database.db_to_string !data)
   else if String.contains line ' ' = false then
-    print_state "Invalid Type, must include ID" |> read_input
+    print_state "Invalid Type, must include Type and ID\n" |> read_input
   else
     let input_list = String.split_on_char ' ' line in
     if List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
@@ -88,11 +88,11 @@ let rec read_input line =
       read_line () |> read_input)
     else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
-        print_state "Invalid Type definition, must include ID" |> read_input
+        print_state "Invalid Type definition, must include Type and ID\n" |> read_input
       else
         match input_list |> List.tl |> parse_constructor_defn with
         | _ -> read_input (read_line ())
-    else print_state "Type does not exist" |> read_input
+    else print_state "Type does not exist\n" |> read_input
 
 (** [main ()] prompts for the script to start, then starts it. *)
 let main () =
@@ -104,7 +104,7 @@ let main () =
     \   type valueName\n\
     \   ...\n\
     \   type valueName\n\n\n";
-  read_line () |> read_input |> ignore
+  read_line () |> read_input
 
 (* Execute the CLI. *)
 let () = main ()
