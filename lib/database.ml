@@ -18,6 +18,16 @@ type entry =
   | Id of (string * entry)
   | Type of (string * entry)
 
+let name_map t =
+  match t with
+  | String _ -> "string"
+  | Float _ -> "float"
+  | Int _ -> "int"
+  | Char _ -> "char"
+  | Bool _ -> "bool"
+  | Id _ -> "id"
+  | Type _ -> "type"
+
 let rec entry_to_string ent =
   match ent with
   | String x -> x
@@ -26,7 +36,7 @@ let rec entry_to_string ent =
   | Char x -> String.make 1 x
   | Bool x -> string_of_bool x
   | Id (a, b) -> a ^ "@" ^ entry_to_string b
-  | Type (a, b) -> a ^ " of " ^ entry_to_string b
+  | Type (a, b) -> name_map b ^ " " ^ a
 
 module ListOfTupleTable :
   Table with type t = entry list list and type value = entry list = struct
@@ -84,13 +94,13 @@ module Database = struct
     with
     | exception Not_found -> (name, T.empty ex) :: database
     | _ -> raise (Arg.Bad "Name already in database")
-  
-  let add_table_complete database table name = 
+
+  let add_table_complete database table name =
     match
-    List.find (fun a -> match a with tname, t -> name = tname) database
-  with
-  | exception Not_found -> (name, table) :: database
-  | _ -> raise (Arg.Bad "Name already in database")
+      List.find (fun a -> match a with tname, t -> name = tname) database
+    with
+    | exception Not_found -> (name, table) :: database
+    | _ -> raise (Arg.Bad "Name already in database")
 
   let drop_table name database =
     List.filter (fun a -> match a with tname, t -> name <> tname) database
@@ -148,32 +158,53 @@ module Database = struct
                     | Some _ -> ())
                 | _ -> ())
             | _ -> raise Stack_overflow))
+    | exception Not_found ->
+        print_endline "Error in check value, no type found";
+        print_endline (db_to_string database)
 
-    let rec process_new_types inputs : entry list =
-      match inputs with
-      | [] -> []
-      | hd :: tl -> (match hd with | [] -> raise Stack_overflow | hd :: tl -> (let tle = (match tl with | a :: b -> a | _ -> raise Stack_overflow) in match hd with
-      | "string" -> Type (tle, String "")
-      | "int" -> Type (tle, Int 0)
-      | "bool" -> Type (tle, Bool false)
-      | "float" -> Type (tle, Float 0.)
-      | "char" -> Type (tle, (Char 'a'))
-      | _ -> raise Stack_overflow)) :: (process_new_types (List.tl inputs))
-
-
-    let rec process_types types inputs = match types with
+  let rec process_new_types inputs : entry list =
+    match inputs with
     | [] -> []
-    | hd :: tl -> (match hd with | Type (name, typ) -> (match typ with 
-    | String _ -> String (List.hd inputs) 
-    | Float _ -> Float (float_of_string (List.hd inputs))
-    | Int _ -> Int (int_of_string (List.hd inputs))
-    | Char _ -> Char ((List.hd inputs).[0])
-    | Bool _ -> Bool (bool_of_string (List.hd inputs))
-    | Id _ -> Id ("", String "")
-    | Type _ -> raise Stack_overflow ) 
-    | _ -> raise Stack_overflow) :: process_types tl (List.tl inputs)
-    let process_list table entries (database : (string * T.t) list) = match (List.find (fun a -> match a with n, tt -> n = table) database) with
+    | hd :: tl ->
+        (match hd with
+        | [] -> raise Stack_overflow
+        | hd :: tl -> (
+            let tle = match tl with a :: b -> a | _ -> raise Stack_overflow in
+            match hd with
+            | "string" -> Type (tle, String "")
+            | "int" -> Type (tle, Int 0)
+            | "bool" -> Type (tle, Bool false)
+            | "float" -> Type (tle, Float 0.)
+            | "char" -> Type (tle, Char 'a')
+            | _ -> raise Stack_overflow))
+        :: process_new_types (List.tl inputs)
+
+  let rec process_types types inputs =
+    match types with
+    | [] -> []
+    | hd :: tl ->
+        (match hd with
+        | Type (name, typ) -> (
+            match typ with
+            | String _ -> String (List.hd inputs)
+            | Float _ -> Float (float_of_string (List.hd inputs))
+            | Int _ -> Int (int_of_string (List.hd inputs))
+            | Char _ -> Char (List.hd inputs).[0]
+            | Bool _ -> Bool (bool_of_string (List.hd inputs))
+            | Id _ -> Id ("", String "")
+            | Type _ -> raise Stack_overflow)
+        | _ -> raise Stack_overflow)
+        :: process_types tl (List.tl inputs)
+
+  let process_list table entries (database : (string * T.t) list) =
+    match List.find (fun a -> match a with n, tt -> n = table) database with
     | _, [] -> raise Stack_overflow
-    | _, types :: rest -> [process_types types entries]
-    let add_entry table_name new_row database = add_table_complete (drop_table table_name database) (match get_table table_name database with a,b -> (b @ process_list table_name new_row database )) table_name
+    | _, types :: rest -> [ process_types types entries ]
+
+  let add_entry table_name new_row database =
+    add_table_complete
+      (drop_table table_name database)
+      (match get_table table_name database with
+      | a, b -> b @ process_list table_name new_row database)
+      table_name
 end
