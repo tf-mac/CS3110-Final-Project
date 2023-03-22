@@ -11,11 +11,11 @@ let rec lst_to_string lst =
 
 let check_value_defn x =
   match x with
-  | "int" :: t -> Valid [ "int"; lst_to_string t ]
-  | "char" :: t -> Valid [ "char"; lst_to_string t ]
-  | "bool" :: t -> Valid [ "bool"; lst_to_string t ]
-  | "float" :: t -> Valid [ "float"; lst_to_string t ]
-  | "string" :: t -> Valid [ "string"; lst_to_string t ]
+  | "int" :: t -> Valid [ "int"; lst_to_string t |> String.trim ]
+  | "char" :: t -> Valid [ "char"; lst_to_string t |> String.trim ]
+  | "bool" :: t -> Valid [ "bool"; lst_to_string t |> String.trim ]
+  | "float" :: t -> Valid [ "float"; lst_to_string t |> String.trim ]
+  | "string" :: t -> Valid [ "string"; lst_to_string t |> String.trim ]
   | l ->
       if List.mem (List.hd l) !user_defined_types = true then
         Valid [ List.hd l; List.tl l |> lst_to_string ]
@@ -51,51 +51,57 @@ let parse_constructor_defn line =
   in
   match data := Database.add_table !data table (List.hd line) with _ -> [ [] ]
 
-let rec parse_value type_name line : string list =
-  let line_list = String.split_on_char '=' line in
-  let entry_id = List.hd line_list in
-  let entry_value = line_list |> List.tl |> lst_to_string in
-  match Database.check_value !data type_name entry_id entry_value with
-  | exception Database.WrongType ->
-      print_state "   '" ^ entry_value ^ "' is not the correct type\n"
-      |> parse_value type_name
-  | _ -> ( match line_list with [ a; b ] -> [ b ] | _ -> raise Stack_overflow)
+let rec parse_value type_name line =
+  if String.contains line '=' = false then
+    print_state "   Must assign with '='\n   " |> parse_value type_name
+  else
+    let line_list = String.split_on_char '=' line in
+    if line_list |> List.tl |> List.hd = "" then
+      print_state "   Must have value after '='\n   " |> parse_value type_name
+    else
+      let entry_id = List.hd line_list |> String.trim in
+      let entry_value = line_list |> List.tl |> lst_to_string |> String.trim in
+      try
+        Database.check_value !data type_name entry_id entry_value;
+        entry_value
+      with
+      | Database.NoEntry ->
+          print_state ("   No entry of name '" ^ entry_id ^ "'\n   ")
+          |> parse_value type_name
+      | Database.WrongType ->
+          print_state ("   '" ^ entry_value ^ "' is not the correct type\n   ")
+          |> parse_value type_name
 
 let add_entry new_row table =
-  print_string ("Adding to " ^ table ^ "\n");
-  match data := Database.add_entry table new_row !data with
-  | _ -> print_string (Database.db_to_string !data)
+  match data := Database.add_entry table new_row !data with _ -> ()
+
 
 let rec read_make type_name line =
   match line with
   | "" -> []
-  | s -> (
-      match parse_value type_name line with
-      | exception Database.NoEntry ->
-          print_state "   No entry of that name\n   " |> read_make type_name
-      | x -> read_make type_name (print_state "   ") @ x)
-
-let rec make_entires type_name inputs =
-  match inputs with
-  | [] -> []
-  | a :: b -> parse_value type_name a :: make_entires type_name b
+  | s ->
+      let holyshitpleasegodhelp = parse_value type_name s in
+      holyshitpleasegodhelp :: read_make type_name (print_state "   ")
 
 let rec read_input line =
-  if line = "print" then print_string (Database.db_to_string !data)
-  else if List.hd (String.split_on_char ' ' line) = "save" then (
-    match String.split_on_char ' ' line with
-    | [] ->
-        print_endline "This shouldn't be possible yet somhow it happened...";
-        read_input (read_line ())
-    | [ _ ] ->
-        print_endline "File name required to store";
-        read_input (read_line ())
-    | _ :: file :: _ ->
-        print_endline ("Saving to " ^ file ^ "...");
-        let oc = Stdlib.open_out file in
-        Stdlib.output_string oc (Database.db_to_string !data);
-        Stdlib.flush oc;
-        read_input (read_line ()))
+  if line = "quit" then ()
+  else if line = "help" then
+    print_state
+      "\n\
+       To define a custom dataframe, type all valueNames must be unique:\n\
+       def TypeName IdName\n\
+      \   type valueName\n\
+      \   ...\n\
+      \   type valueName\n\n\n\
+       To assign values to the custom types, all values must be assigned,\n\
+       in order of their definition:\n\
+       TypeName IdValue\n\
+      \   valueName = value\n\
+      \   ...\n\
+      \   valueName = value\n\n"
+    |> read_input
+  else if line = "print" then
+    Database.db_to_string !data ^ "\n" |> print_state |> read_input
   else if String.contains line ' ' = false then
     print_state "Invalid Type, must include Type and ID\n" |> read_input
   else
@@ -113,7 +119,7 @@ let rec read_input line =
         |> read_input
       else
         match input_list |> List.tl |> parse_constructor_defn with
-        | _ -> read_input (read_line ())
+        | _ -> read_line () |> read_input
     else print_state "Type does not exist\n" |> read_input
 
 let rec process_commands input =
@@ -124,16 +130,11 @@ let rec process_commands input =
   process_commands (read_line ())
 
 (** [main ()] prompts for the script to start, then starts it. *)
-let main () =
-  print_string "\n\nWelcome to the 3110 Database Command Line\n";
-  print_endline
-    "Please describe the data you want to store. To define a custom dataframe, \
-     type:\n\
-     def TypeName id\n\
-    \   type valueName\n\
-    \   ...\n\
-    \   type valueName\n\n\n";
-  read_line () |> read_input
 
-(* Execute the CLI. *)
-let () = main ()
+let main () =
+  print_string
+    "\n\n\
+     Welcome to the 3110 Database Command Line\n\
+     Please describe the data you want to store.\n\
+     Type 'quit' to quit, 'help' for help.\n\n";
+  read_line () |> read_input
