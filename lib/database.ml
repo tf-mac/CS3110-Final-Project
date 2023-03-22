@@ -18,6 +18,16 @@ type entry =
   | Id of (string * entry)
   | Type of (string * entry)
 
+let name_map t =
+  match t with
+  | String _ -> "string"
+  | Float _ -> "float"
+  | Int _ -> "int"
+  | Char _ -> "char"
+  | Bool _ -> "bool"
+  | Id _ -> "id"
+  | Type _ -> "type"
+
 let rec entry_to_string ent =
   match ent with
   | String x -> x
@@ -26,7 +36,7 @@ let rec entry_to_string ent =
   | Char x -> String.make 1 x
   | Bool x -> string_of_bool x
   | Id (a, b) -> a ^ "@" ^ entry_to_string b
-  | Type (a, b) -> a ^ " of " ^ entry_to_string b
+  | Type (a, b) -> name_map b ^ " " ^ a
 
 module ListOfTupleTable :
   Table with type t = entry list list and type value = entry list = struct
@@ -148,7 +158,9 @@ module Database = struct
                     | Some _ -> ())
                 | _ -> ())
             | _ -> raise Stack_overflow))
-    | exception Not_found -> (print_endline "Error in check value, no type found"); print_endline (db_to_string database)
+    | exception Not_found ->
+        print_endline "Error in check value, no type found";
+        print_endline (db_to_string database)
 
   let rec process_new_types inputs : entry list =
     match inputs with

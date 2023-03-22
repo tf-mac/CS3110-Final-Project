@@ -45,7 +45,10 @@ let rec read_value_defn line =
 let parse_constructor_defn line =
   print_string "   ";
   line |> List.hd |> add_type;
-  let table = Database.process_new_types (read_line () |> read_value_defn) in
+  let table =
+    Database.process_new_types
+      ([ "string"; List.hd (List.tl line) ] :: (read_line () |> read_value_defn))
+  in
   match data := Database.add_table !data table (List.hd line) with _ -> [ [] ]
 
 let rec parse_value type_name line =
@@ -71,6 +74,7 @@ let rec parse_value type_name line =
 
 let add_entry new_row table =
   match data := Database.add_entry table new_row !data with _ -> ()
+
 
 let rec read_make type_name line =
   match line with
@@ -102,9 +106,12 @@ let rec read_input line =
     print_state "Invalid Type, must include Type and ID\n" |> read_input
   else
     let input_list = String.split_on_char ' ' line in
-    if List.mem (input_list |> List.hd) !user_defined_types then (
-      let type_name = List.hd input_list in
-      type_name |> add_entry (print_state "   " |> read_make type_name);
+    if List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
+    then (
+      add_entry
+        ((List.tl input_list |> lst_to_string)
+        :: read_make (List.hd input_list) (print_state "   "))
+        (List.hd input_list);
       read_line () |> read_input)
     else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
@@ -114,6 +121,13 @@ let rec read_input line =
         match input_list |> List.tl |> parse_constructor_defn with
         | _ -> read_line () |> read_input
     else print_state "Type does not exist\n" |> read_input
+
+let rec process_commands input =
+  (match List.hd (String.split_on_char ' ' input) with
+  | "def" -> print_string ""
+  | "print" -> print_string (Database.db_to_string !data)
+  | _ -> print_endline "Unrecognized command, try help for a list of commands");
+  process_commands (read_line ())
 
 (** [main ()] prompts for the script to start, then starts it. *)
 
