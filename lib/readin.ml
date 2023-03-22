@@ -75,7 +75,6 @@ let rec parse_value type_name line =
 let add_entry new_row table =
   match data := Database.add_entry table new_row !data with _ -> ()
 
-
 let rec read_make type_name line =
   match line with
   | "" -> []
@@ -85,6 +84,20 @@ let rec read_make type_name line =
 
 let rec read_input line =
   if line = "quit" then ()
+  else if List.hd (String.split_on_char ' ' line) = "save" then (
+    match String.split_on_char ' ' line with
+    | [] ->
+        print_endline "This shouldn't be possible yet somhow it happened...";
+        read_input (read_line ())
+    | [ _ ] ->
+        print_endline "File name required to store";
+        read_input (read_line ())
+    | _ :: file :: _ ->
+        print_endline ("Saving to " ^ file ^ "...");
+        let oc = Stdlib.open_out file in
+        Stdlib.output_string oc (Database.db_to_string !data);
+        Stdlib.flush oc;
+        read_input (read_line ()))
   else if line = "help" then
     print_state
       "\n\
@@ -98,7 +111,8 @@ let rec read_input line =
        TypeName IdValue\n\
       \   valueName = value\n\
       \   ...\n\
-      \   valueName = value\n\n"
+      \   valueName = value\n\n\
+       To save to a file, use 'save <file>'\n"
     |> read_input
   else if line = "print" then
     Database.db_to_string !data ^ "\n" |> print_state |> read_input

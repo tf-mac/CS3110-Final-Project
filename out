@@ -1,6 +1,6 @@
-Table:	joe
-age of 0	
-5	
+Table:	Person
+string Jim	int age	
+joe	5	
 
 
 
