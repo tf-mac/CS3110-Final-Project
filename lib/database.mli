@@ -64,7 +64,7 @@ module Database : sig
 
   module T = ListOfTupleTable
 
-  val empty : entry list
+  val empty : 'a list
   (** [empty] is a table containing no elements
       *)
   val add_table : (string *T.t) list -> entry list -> string -> (string *T.t) list
@@ -92,7 +92,7 @@ module Database : sig
   (** [add_entry table_name new_row database] is the same [database] with a new 
   entry [new_row] associated with value [table_name] 
       *)
-  val process_types : entry list -> string list -> entry list
+  val process_new_types : string list list  -> entry list
   (** [process_new_types types inputs] matches user string [inputs] with OCaml
       primitive types [types]
       *)
