@@ -1,6 +1,8 @@
 open Database
+open Tables
+module DB = Database (Tables.ListTable)
 
-let data = ref Database.empty
+let data = ref DB.empty
 
 type input = Empty | Malformed | Valid of string list
 
@@ -46,10 +48,10 @@ let parse_constructor_defn line =
   print_string "   ";
   line |> List.hd |> add_type;
   let table =
-    Database.process_new_types
+    DB.process_new_types
       ([ "string"; List.hd (List.tl line) ] :: (read_line () |> read_value_defn))
   in
-  match data := Database.add_table !data table (List.hd line) with _ -> [ [] ]
+  match data := DB.build_table !data table (List.hd line) with _ -> [ [] ]
 
 let rec parse_value type_name line =
   if String.contains line '=' = false then
@@ -62,18 +64,18 @@ let rec parse_value type_name line =
       let entry_id = List.hd line_list |> String.trim in
       let entry_value = line_list |> List.tl |> lst_to_string |> String.trim in
       try
-        Database.check_value !data type_name entry_id entry_value;
+        DB.check_value !data type_name entry_id entry_value;
         entry_value
       with
-      | Database.NoEntry ->
+      | DB.NoEntry ->
           print_state ("   No entry of name '" ^ entry_id ^ "'\n   ")
           |> parse_value type_name
-      | Database.WrongType ->
+      | DB.WrongType ->
           print_state ("   '" ^ entry_value ^ "' is not the correct type\n   ")
           |> parse_value type_name
 
 let add_entry new_row table =
-  match data := Database.add_entry table new_row !data with _ -> ()
+  match data := DB.add_entry table new_row !data with _ -> ()
 
 let rec read_make type_name line =
   match line with
@@ -95,7 +97,7 @@ let rec read_input line =
     | _ :: file :: _ ->
         print_endline ("Saving to " ^ file ^ "...");
         let oc = Stdlib.open_out file in
-        Stdlib.output_string oc (Database.db_to_string !data);
+        Stdlib.output_string oc (DB.db_to_string !data);
         Stdlib.flush oc;
         read_input (read_line ()))
   else if line = "help" then
@@ -115,18 +117,18 @@ let rec read_input line =
        To save to a file, use 'save <file>'\n"
     |> read_input
   else if line = "print" then
-    Database.db_to_string !data ^ "\n" |> print_state |> read_input
+    DB.db_to_string !data ^ "\n" |> print_state |> read_input
   else if String.contains line ' ' = false then
     print_state "Invalid Type, must include Type and ID\n" |> read_input
   else
     let input_list = String.split_on_char ' ' line in
     if List.mem (String.split_on_char ' ' line |> List.hd) !user_defined_types
-    then (
-      add_entry
+    then (**
+      (add_entry
         ((List.tl input_list |> lst_to_string)
         :: read_make (List.hd input_list) (print_state "   "))
-        (List.hd input_list);
-      read_line () |> read_input)
+        (List.hd input_list);*)
+      read_line () |> read_input
     else if input_list |> List.hd = "def" then
       if List.length input_list = 2 then
         print_state "Invalid Type definition, must include Type and ID\n"
@@ -139,7 +141,7 @@ let rec read_input line =
 let rec process_commands input =
   (match List.hd (String.split_on_char ' ' input) with
   | "def" -> print_string ""
-  | "print" -> print_string (Database.db_to_string !data)
+  | "print" -> print_string (DB.db_to_string !data)
   | _ -> print_endline "Unrecognized command, try help for a list of commands");
   process_commands (read_line ())
 
