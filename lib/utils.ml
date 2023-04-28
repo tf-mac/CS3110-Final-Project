@@ -37,3 +37,9 @@ let rec entry_to_string ent =
   | Bool x -> string_of_bool x
   | Id (a, b) -> a ^ "@" ^ entry_to_string b
   | Type (a, b) -> name_map_types b ^ " " ^ a
+
+let shorten inp =
+  let str = String.trim inp in
+  if String.length str < 8 then str ^ "\t\t"
+  else if String.length str < 16 then str ^ "\t"
+  else String.sub str 0 16

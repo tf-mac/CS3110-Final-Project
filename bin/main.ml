@@ -1,2 +1,3 @@
 open RelationalDatabase
-let () = RelationalDatabase.Readin.main ()
+
+let () = RelationalDatabase.Cli.main ()

@@ -1,0 +1,10 @@
+def Person name
+int age
+string home
+
+Person Jim
+age=5
+home=lol
+
+print
+quit

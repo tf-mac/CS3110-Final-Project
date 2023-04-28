@@ -12,3 +12,4 @@ type entry =
 val name_map_entry : entry -> string
 val name_map_types : types -> string
 val entry_to_string : entry -> string
+val shorten : string -> string
