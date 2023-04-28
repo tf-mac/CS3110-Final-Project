@@ -115,12 +115,6 @@ module ListTable : Table = struct
       table
 
   let rec table_to_string (table : t) =
-    let rec build_row entlist =
-      match entlist with
-      | [] -> "\n"
-      | Some x :: xs -> entry_to_string x ^ "\t\t" ^ build_row xs
-      | None :: xs -> "\t\t" ^ build_row xs
-    in
     match table with
     | [] -> ""
     | b :: xs -> build_row b ^ table_to_string xs ^ "\n"
@@ -195,12 +189,6 @@ module HashTable = struct
     HashTab (header table, out)
 
   let rec table_to_string table =
-    let rec build_row entlist =
-      match entlist with
-      | [] -> "\n\n"
-      | Some x :: xs -> shorten (entry_to_string x) ^ build_row xs
-      | None :: xs -> "\t\t" ^ build_row xs
-    in
     Hashtbl.fold
       (fun id ent acc -> acc ^ shorten (entry_to_string id) ^ build_row ent)
       (hshtable table)

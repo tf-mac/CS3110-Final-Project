@@ -43,3 +43,11 @@ let shorten inp =
   if String.length str < 8 then str ^ "\t\t"
   else if String.length str < 16 then str ^ "\t"
   else String.sub str 0 16
+
+let rec build_row entlist =
+  match entlist with
+  | [] -> "\n\n"
+  | Some x :: xs -> shorten (entry_to_string x) ^ build_row xs
+  | None :: xs -> "\t\t" ^ build_row xs
+
+let rec optionize = function [] -> [] | hd :: tl -> Some hd :: optionize tl

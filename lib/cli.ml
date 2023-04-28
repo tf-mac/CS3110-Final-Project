@@ -107,6 +107,19 @@ let process_type = function
       | Some _ -> print_endline ("|    <|\n Type " ^ name ^ " already defined")
       | None -> build_type (name, id, []) ())
 
+let process_at = function
+  | [] | [ "" ] ->
+      print_endline "Please enter what type you which to get an instance of"
+  | [ name ] ->
+      print_endline "Please enter an id of the instance you which to get"
+  | name :: id :: tl -> (
+      match DB.get_table name !db with
+      | Some x ->
+          print_endline (build_row (optionize (Tbl.header x)));
+          print_endline (build_row (Tbl.at x (String id)))
+      | None -> print_endline ("No type named " ^ name))
+
+(** [parse_input input] takes in new input and determines the relevant command*)
 let rec parse_input input =
   (match String.split_on_char ' ' input with
   | "quit" :: tl -> exit 0
@@ -120,7 +133,7 @@ let rec parse_input input =
         \   type valueName\n\n\n\
          To assign values to the custom types, all values must be assigned,\n\
          in order of their definition:\n\
-         TypeName IdValue\n\
+         assign TypeName IdValue\n\
         \   valueName = value\n\
         \   ...\n\
         \   valueName = value\n\n\
@@ -128,7 +141,8 @@ let rec parse_input input =
   | "def" :: tl -> process_type tl
   | "assign" :: tl -> process_assign tl
   | "print" :: tl -> print_endline (DB.db_to_string !db)
-  | _ -> exit 0);
+  | "at" :: tl -> process_at tl
+  | _ -> print_endline "Unknown command. Type help for a list of commands");
   print_string "|> ";
   read_line () |> parse_input
 
