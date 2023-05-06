@@ -10,5 +10,11 @@
   val parse_constructor_defn : string list -> string list list
   val read_make : string -> string -> string list
   val read_input : string -> unit*)
-val parse_input : string -> string
+
 val main : unit -> unit
+
+module type CliHandler = sig
+  val parse_input : string -> string
+end
+
+module CLI : CliHandler
