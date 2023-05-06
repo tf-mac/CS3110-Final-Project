@@ -10,4 +10,5 @@
   val parse_constructor_defn : string list -> string list list
   val read_make : string -> string -> string list
   val read_input : string -> unit*)
+val parse_input : string -> string
 val main : unit -> unit

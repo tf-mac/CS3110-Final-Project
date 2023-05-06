@@ -1,0 +1,3 @@
+(executable
+ (name main)
+ (libraries RelationalDatabase ounit2 qcheck-core))
