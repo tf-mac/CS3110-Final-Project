@@ -1,2 +1,3 @@
 (library
- (name RelationalDatabase))
+ (name RelationalDatabase)
+ (libraries yojson))

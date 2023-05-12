@@ -1,0 +1,18 @@
+{
+    "err_create_field_DNE": "That field does not exist in this type\n|    ",
+    "err_create_field_wrong_type": "That value does not match the type of the field\n|    ",
+    "err_create_empty_name": "Please enter a non-empty name\n|    ",
+    "err_create_field_no_value": "Please input a variable and a value\n|    ",
+    "err_create_field_already_entered": "",
+    "err_assign_empty": "",
+    "err_assign_no_id": "",
+    "err_assign_DNE": "That type does not exist\n|> ",
+    "err_defn_needs_type_name": "Please enter a type name for the definition\n|> ",
+    "err_defn_needs_ID_name": "Please enter a name for the ID of this type\n|> ",
+    "err_defn_already_exists": "\n Type already defined\n|> ",
+    "err_defn_no_name": "Please enter a name for this field\n|    ",
+    "err_defn_invalid_type": "Not a recognized type\n|    ",
+    "err_unknown_command": "",
+    "err_at_no_id": "",
+    "help_message": "\nTo define a custom dataframe, type the following,\nall valueNames must be unique:\ndef TypeName IdName\n   type valueName\n   ...\n   type valueName\n\n\nTo assign values to the custom types:\nassign TypeName IdValue\n   valueName = value\n   ...\n   valueName = value\n\nTo save to a file, use 'save <file>'\n\n|> "
+}

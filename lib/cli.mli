@@ -15,6 +15,8 @@ val main : unit -> unit
 
 module type CliHandler = sig
   val parse_input : string -> string
+  val get_response : string -> string
+  val reset : unit -> unit
 end
 
 module CLI : CliHandler
