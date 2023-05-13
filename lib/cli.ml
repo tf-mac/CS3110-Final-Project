@@ -27,7 +27,6 @@ module CLI = struct
 
   let response_names =
     [
-      "err_create_empty_name";
       "err_create_field_DNE";
       "err_create_field_wrong_type";
       "err_create_field_no_value";
@@ -41,8 +40,9 @@ module CLI = struct
       "err_defn_no_name";
       "err_defn_invalid_type";
       "err_unknown_command";
-      "err_invalid_expr";
-      "err_invalid_comparison";
+      "err_find_invalid_expr";
+      "err_find_invalid_comparison";
+      "err_find_invalid_type";
       "err_at_no_id";
       "help_message";
       "indent_end";
@@ -97,14 +97,10 @@ module CLI = struct
       input |> String.split_on_char '=' |> List.map String.trim
       |> List.filter (fun s -> s <> "")
     with
-    | [] | [ "" ] ->
+    | [] ->
         DB.add_named_entry name vals !db;
         current_state := Default;
         get_response "indent_end" (* "|    <|\n|> " *)
-    | "" :: tl ->
-        current_state := BuildInstance (name, table, vals);
-        get_response "err_create_empty_name"
-        (* "Please enter a non-empty name\n|    " *)
     | [ n ] ->
         current_state := BuildInstance (name, table, vals);
         get_response "err_create_field_no_value"
@@ -134,7 +130,7 @@ module CLI = struct
 
   let process_assign input =
     match input |> List.map String.trim |> List.filter (fun s -> s <> "") with
-    | [] | [ "" ] ->
+    | [] ->
         get_response "err_assign_empty"
         (* "Please input a type name and id\n|> " *)
     | [ name ] ->
@@ -163,7 +159,7 @@ module CLI = struct
     | "float" -> Type (name, Floats)
     | "string" -> Type (name, Strings)
     | "bool" -> Type (name, Bools)
-    | "chars" -> Type (name, Chars)
+    | "char" -> Type (name, Chars)
     | "id" -> Type (name, Ids)
     | _ -> raise ParseError
 
@@ -173,7 +169,7 @@ module CLI = struct
       |> List.map String.trim
       |> List.filter (fun s -> s <> "")
     with
-    | [] | [ "" ] ->
+    | [] ->
         db := DB.build_table !db (Type (id, Strings) :: types) name;
         current_state := Default;
         get_response "indent_end" (* "|    <|\n|> " *)
@@ -192,7 +188,7 @@ module CLI = struct
 
   let process_type input =
     match List.filter (fun s -> s <> "") input with
-    | [] | [ "" ] -> get_response "err_defn_needs_type_name"
+    | [] -> get_response "err_defn_needs_type_name"
     (* "Please enter a type name for the definition\n|> " *)
     | [ name ] ->
         get_response "err_defn_needs_ID_name"
@@ -262,18 +258,19 @@ module CLI = struct
       lst |> List.map String.trim |> List.filter (fun s -> s <> "")
     in
     match DB.get_table (List.hd cleaned_lst) !db with
-    | None -> ""
+    | None -> get_response "err_find_invalid_type"
     | Some type_table -> (
         try
-          cleaned_lst
+          cleaned_lst |> List.tl
           |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
           |> split_on_substring " and " |> List.map String.trim
           |> List.filter (fun s -> s <> "")
+          |> (fun lst -> if lst = [] then raise InvalidExpr else lst)
           |> List.map parse_compare_exp
           |> Tbl.process_constraints type_table
         with
-        | InvalidExpr -> get_response "err_invalid_expr"
-        | InvalidComparison -> get_response "err_invalid_comparison")
+        | InvalidExpr -> get_response "err_find_invalid_expr"
+        | InvalidComparison -> get_response "err_find_invalid_comparison")
 
   (** [parse_input input] takes in new input and determines the relevant command*)
   let parse_input input =
