@@ -1,2 +1,5 @@
 (library
- (name RelationalDatabase))
+ (name RelationalDatabase)
+ (libraries yojson)
+ (instrumentation
+  (backend bisect_ppx)))
