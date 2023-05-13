@@ -3,6 +3,7 @@ open Tables
 
 module Database (Table : Table) : sig
   exception NoEntry
+  (** Raised when an entry that does not exist is parsed. *)
   exception WrongType
   exception TableExists
 
