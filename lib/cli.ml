@@ -20,6 +20,8 @@ module CLI = struct
     | BuildType of (string * string * entry list)
 
   exception ParseError
+  exception InvalidExpr
+  exception InvalidComparison
 
   let current_state = ref Default
 
@@ -39,8 +41,13 @@ module CLI = struct
       "err_defn_no_name";
       "err_defn_invalid_type";
       "err_unknown_command";
+      "err_invalid_expr";
+      "err_invalid_comparison";
       "err_at_no_id";
       "help_message";
+      "indent_end";
+      "indent";
+      "default";
     ]
 
   let get_json_item file entry =
@@ -93,7 +100,7 @@ module CLI = struct
     | [] | [ "" ] ->
         DB.add_named_entry name vals !db;
         current_state := Default;
-        "|    <|\n|> "
+        get_response "indent_end" (* "|    <|\n|> " *)
     | "" :: tl ->
         current_state := BuildInstance (name, table, vals);
         get_response "err_create_empty_name"
@@ -114,7 +121,7 @@ module CLI = struct
                 match parse_value v t with
                 | x ->
                     current_state := BuildInstance (name, table, (n, x) :: vals);
-                    "|    "
+                    get_response "indent" (* "|    " *)
                 | exception ParseError ->
                     current_state := BuildInstance (name, table, vals);
                     get_response "err_create_field_wrong_type"
@@ -122,12 +129,17 @@ module CLI = struct
                 ))
         | Some _ ->
             current_state := BuildInstance (name, table, vals);
-            "This field has already been entered\n|    ")
+            get_response "err_create_field_already_entered"
+            (* "This field has already been entered\n|    " *))
 
   let process_assign input =
     match input |> List.map String.trim |> List.filter (fun s -> s <> "") with
-    | [] | [ "" ] -> "Please input a type name and id\n|> "
-    | [ name ] -> "Please input an id for this instance\n|> "
+    | [] | [ "" ] ->
+        get_response "err_assign_empty"
+        (* "Please input a type name and id\n|> " *)
+    | [ name ] ->
+        get_response "err_assign_no_id"
+        (* "Please input an id for this instance\n|> " *)
     | name :: id :: tl -> (
         match DB.get_table name !db with
         | Some t ->
@@ -164,14 +176,14 @@ module CLI = struct
     | [] | [ "" ] ->
         db := DB.build_table !db (Type (id, Strings) :: types) name;
         current_state := Default;
-        "|    <|\n|> "
+        get_response "indent_end" (* "|    <|\n|> " *)
     | [ typ ] -> get_response "err_defn_no_name"
     (* "Please enter a name for this field\n|    " *)
     | typ :: field_name :: tl -> (
         match parse_type (typ, field_name) with
         | Type _ as t ->
             current_state := BuildType (name, id, types @ [ t ]);
-            "|    "
+            get_response "indent" (* "|    " *)
         | exception ParseError ->
             current_state := BuildType (name, id, types);
             get_response
@@ -192,19 +204,78 @@ module CLI = struct
             (* "\n Type already defined\n|> " *)
         | None ->
             current_state := BuildType (name, id, []);
-            "|    ")
+            get_response "indent" (* "|    " *))
 
   let process_at = function
     | [] | [ "" ] ->
-        "Please enter what the type and id of which to get an instance\n|> "
-    | [ name ] -> "Please enter an id of the instance you which to get\n|> "
+        get_response "err_at_empty"
+        (* "Please enter what the type and id of which to get an instance\n|> " *)
+    | [ name ] ->
+        get_response "err_at_no_id"
+        (* "Please enter an id of the instance you which to get\n|> " *)
     | name :: id :: tl -> (
         match DB.get_table name !db with
         | Some x ->
             (x |> Tbl.header |> optionize |> build_row)
             ^ "\n"
             ^ (String id |> Tbl.at x |> build_row)
-        | None -> "No type of that name")
+        | None ->
+            get_response "err_at_invalid_type" (* "No type of that name" *))
+
+  let split_on_substring sub str =
+    let idxs = ref [ 0 ] in
+    let sub_len = String.length sub in
+    for i = 0 to String.length str - sub_len do
+      if String.sub str i sub_len = sub then
+        idxs := !idxs @ [ i; i + String.length sub ]
+      else ()
+    done;
+    idxs := !idxs @ [ String.length str ];
+    let rec create_lst idxs sub_len str =
+      match idxs with
+      | [] -> []
+      | s :: e :: t -> String.sub str s (e - s) :: create_lst t sub_len str
+      | _ -> failwith "odd"
+    in
+    create_lst !idxs sub_len str
+
+  let parse_compare_exp str =
+    let str_lst = String.split_on_char ' ' str in
+    if List.length str_lst <> 3 then raise InvalidExpr
+    else
+      match str_lst with
+      | [ var; compare; value ] ->
+          ( var,
+            (match compare with
+            | "=" -> Utils.EQ
+            | "<>" -> Utils.NEQ
+            | ">" -> Utils.GT
+            | "<" -> Utils.LT
+            | "<=" -> Utils.LTE
+            | ">=" -> Utils.GTE
+            | _ -> raise InvalidComparison),
+            value )
+      | _ -> failwith "should be impossible"
+
+  let placeholdertablehandler tn ls = ""
+
+  let process_find lst =
+    let cleaned_lst =
+      lst |> List.map String.trim |> List.filter (fun s -> s <> "")
+    in
+    match DB.get_table (List.hd cleaned_lst) !db with
+    | None -> ""
+    | Some type_table -> (
+        try
+          cleaned_lst
+          |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
+          |> split_on_substring " and " |> List.map String.trim
+          |> List.filter (fun s -> s <> "")
+          |> List.map parse_compare_exp
+          |> placeholdertablehandler type_table
+        with
+        | InvalidExpr -> get_response "err_invalid_expr"
+        | InvalidComparison -> get_response "err_invalid_comparison")
 
   (** [parse_input input] takes in new input and determines the relevant command*)
   let parse_input input =
@@ -219,7 +290,10 @@ module CLI = struct
         | "assign" :: tl -> process_assign tl
         | "print" :: tl -> DB.db_to_string !db ^ "\n|> "
         | "at" :: tl -> process_at tl ^ "\n|> "
-        | _ -> "Unknown command. Type help for a list of commands\n|> ")
+        | "find" :: tl -> process_find tl
+        | _ ->
+            get_response "err_unknown_command"
+            (* "Unknown command. Type help for a list of commands\n|> " *))
 end
 
 (** [main ()] prompts for the script to start, then starts it. *)

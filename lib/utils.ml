@@ -1,4 +1,5 @@
 type types = Strings | Floats | Ints | Chars | Bools | Ids
+type comparison = LT | LTE | EQ | NEQ | GT | GTE
 
 type entry =
   | String of string

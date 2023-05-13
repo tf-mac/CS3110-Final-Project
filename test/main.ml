@@ -49,15 +49,27 @@ let def_tests =
         "wrong type error",
         "flat float",
         get_response "err_defn_invalid_type" );
-      (false, "wrong type error", "float   ", get_response "err_defn_no_name");
+      ( false,
+        "no name error when blank spaces",
+        "string   ",
+        get_response "err_defn_no_name" );
     ] )
 
 let pre_defn_assign_tests =
   ( [ "def Person Name"; "int age"; "float bank"; ""; "assign Person John" ],
     [
-      (true, "can define types out of order bank", "bank = 5.4", "|    ");
-      (false, "can define types out of order age", "age = 23", "|    ");
-      (false, "can define types out of order end", "", "|    <|\n|> ");
+      ( true,
+        "can define types out of order bank",
+        "bank = 5.4",
+        get_response "indent" );
+      ( false,
+        "can define types out of order age",
+        "age = 23",
+        get_response "indent" );
+      ( false,
+        "can define types out of order empty end",
+        "",
+        get_response "indent_end" );
       ( true,
         "entry doesnt exist error",
         "test = 5",
