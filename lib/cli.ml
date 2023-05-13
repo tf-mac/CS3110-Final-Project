@@ -257,8 +257,6 @@ module CLI = struct
             value )
       | _ -> failwith "should be impossible"
 
-  let placeholdertablehandler tn ls = ""
-
   let process_find lst =
     let cleaned_lst =
       lst |> List.map String.trim |> List.filter (fun s -> s <> "")
@@ -272,7 +270,7 @@ module CLI = struct
           |> split_on_substring " and " |> List.map String.trim
           |> List.filter (fun s -> s <> "")
           |> List.map parse_compare_exp
-          |> placeholdertablehandler type_table
+          |> Tbl.process_constraints type_table
         with
         | InvalidExpr -> get_response "err_invalid_expr"
         | InvalidComparison -> get_response "err_invalid_comparison")
