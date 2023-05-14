@@ -102,7 +102,7 @@ module ListTable : Table = struct
     List.find
       (fun a ->
         match a with
-        | [] -> raise (Failure "This shouldn't happen")
+        | [] -> raise Not_found
         | hd :: tl -> ( match hd with Some x -> x = id | None -> false))
       table
 
