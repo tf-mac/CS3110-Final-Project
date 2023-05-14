@@ -126,6 +126,32 @@ module ListTable : Table = struct
     | [] -> ""
     | b :: xs -> build_row b ^ table_to_string xs ^ "\n"
 
+  let rec table_to_file table =
+    match table with
+    | [] -> "\n"
+    | line :: tl -> build_file_row line ^ table_to_string tl
+
+  let rec entry_extract input l= match String.[l] with
+  | '\t' -> (String.sub input 0 (l), if String.length input - l + 1 <= 0 then "" else String.sub input (l + 1) (String.length input - l + 1))
+  | _ -> entry_extract input (l + 1)
+  let rec types_of_string input = match entry_extract with
+  | _ -> failwith ""
+
+  let rec row_of_file inp acc = failwith ""
+
+  let rec table_of_file_helper input acc =
+    if 
+    match String.split_on_char '\n' input with
+    | [] -> acc
+    | hd :: tl -> acc @ [ row_of_file hd [] ]
+
+  let table_of_file input =
+    let nstring =
+      if input.[0] = '\n' then String.sub input 1 (String.length input - 1)
+      else input
+    in
+    table_of_file_helper nstring []
+
   let rec deoptionize = function
     | [] -> []
     | hd :: tl ->
@@ -221,6 +247,15 @@ module HashTable = struct
       (fun id ent acc -> acc ^ shorten (entry_to_string id) ^ build_row ent)
       (hshtable table)
       (build_row (optionize (header table)))
+
+  let rec table_to_file table =
+    Hashtbl.fold
+      (fun id ent acc ->
+        acc ^ "\t" ^ entry_to_string id ^ "\t" ^ build_file_row ent)
+      (hshtable table)
+      (build_file_row (optionize (header table)))
+
+  let table_of_file input = failwith "Unimplemtned"
 
   let rec process_constraints tbl lst =
     let newHash = Hashtbl.create 0 in

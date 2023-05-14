@@ -120,4 +120,10 @@ let rec build_row entlist =
   | Some x :: xs -> shorten (entry_to_string x) ^ build_row xs
   | None :: xs -> "\t\t" ^ build_row xs
 
+let rec build_file_row entlist =
+  match entlist with
+  | [] -> "\n"
+  | Some x :: xs -> "\t" ^ entry_to_string x ^ build_file_row xs
+  | None :: xs -> "\t" ^ build_file_row xs
+
 let rec optionize = function [] -> [] | hd :: tl -> Some hd :: optionize tl

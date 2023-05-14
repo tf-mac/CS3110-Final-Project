@@ -21,6 +21,8 @@ module type Table = sig
   val at : t -> entry -> entry option list
   val delete : t -> entry -> t
   val table_to_string : t -> string
+  val table_to_file : t -> string
+  val table_of_file : string -> t
 
   (* Processes a given list of constraints
      Raises [Not_found] if a constraint isn't found

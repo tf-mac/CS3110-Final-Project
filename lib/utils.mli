@@ -23,4 +23,5 @@ val name_map_types : types -> string
 val entry_to_string : entry -> string
 val shorten : string -> string
 val build_row : entry option list -> string
+val build_file_row : entry option list -> string
 val optionize : entry list -> entry option list
