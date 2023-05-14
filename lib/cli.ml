@@ -213,7 +213,7 @@ module CLI = struct
     | [ name ] ->
         get_response "err_at_no_id"
         (* "Please enter an id of the instance you which to get\n|> " *)
-    | name :: id :: tl -> (
+    | [ name; id ] -> (
         match DB.get_table name !db with
         | Some x ->
             (x |> Tbl.header |> optionize |> build_row)
@@ -221,6 +221,34 @@ module CLI = struct
             ^ (String id |> Tbl.at x |> build_row)
         | None ->
             get_response "err_at_invalid_type" (* "No type of that name" *))
+    | name :: id :: col :: tl -> (
+        match DB.get_table name !db with
+        | Some x -> (
+            let row = Tbl.at x (String id) in
+            match int_of_string_opt col with
+            | None -> "Column number should be an int"
+            | Some i -> (
+                match List.nth_opt row i with
+                | Some e -> (
+                    match e with
+                    | None -> "No entry"
+                    | Some e -> (
+                        match e with
+                        | Id (name, row) -> (
+                            entry_to_string e ^ "="
+                            ^
+                            match DB.get_reference e !db with
+                            | exception Not_found -> "<unbound type>"
+                            | l, r -> (
+                                "\n"
+                                ^ build_row (optionize l)
+                                ^
+                                match r with
+                                | None -> "<unbound val>"
+                                | Some v -> build_row v))
+                        | _ -> entry_to_string e))
+                | None -> "Column out of range. Hint: Index starts at 0"))
+        | None -> "No type named " ^ name)
 
   let split_on_substring sub str =
     let idxs = ref [ 0 ] in

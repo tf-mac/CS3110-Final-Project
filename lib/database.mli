@@ -15,7 +15,7 @@ module Database (Table : Table) : sig
   val build_table : database -> entry list -> string -> database
   val drop_table : string -> database -> database
   val get_table : string -> database -> table option
-  val get_reference : entry -> database -> string * table
+  val get_reference : entry -> database -> (entry list * entry option list option)
   val db_to_string : database -> string
 
   (* Adds an entry to the table given by id. Raises [Not_found] if the table cannot be found*)
