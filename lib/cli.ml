@@ -243,12 +243,12 @@ module CLI = struct
       | [ var; compare; value ] ->
           ( var,
             (match compare with
-            | "=" -> ( = )
-            | "<>" -> ( <> )
-            | ">" -> ( > )
-            | "<" -> ( < )
-            | "<=" -> ( <= )
-            | ">=" -> ( >= )
+            | "=" -> EQ
+            | "<>" -> NEQ
+            | ">" -> GT
+            | "<" -> LT
+            | "<=" -> LTE
+            | ">=" -> GTE
             | _ -> raise InvalidComparison),
             value )
       | _ -> failwith "should be impossible"
