@@ -74,8 +74,6 @@ let make_compare cmp lhs rhs =
   | GT -> lhs > rhs
   | GTE -> lhs >= rhs
 
-let run_constraint_float (cmp : 'a -> 'a -> bool) lhs rhs = cmp lhs rhs
-
 let run_constraint (cmp : comparison) rhs lhs =
   match rhs with
   | Float r -> (
