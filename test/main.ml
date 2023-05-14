@@ -8,6 +8,10 @@ end
 let better_print s = "'" ^ String.escaped s ^ "'"
 let get_response = CLI.get_response
 
+let handle_table_prints str =
+  str |> String.split_on_char '\t' |> List.map String.trim
+  |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
+
 let rec add_input lst =
   match lst with
   | [] -> ()
@@ -20,7 +24,7 @@ let cli_test (name : string) (actual_output : string) (expected_output : string)
   name >:: fun _ ->
   assert_equal expected_output actual_output ~printer:better_print
 
-let rec make_test primer tests =
+let rec make_test primer tests is_print =
   match tests with
   | [] -> []
   | (reset, name, input, expected) :: t ->
@@ -29,9 +33,11 @@ let rec make_test primer tests =
           CLI.reset ();
           add_input primer)
         else ();
-        cli_test name (CLI.parse_input input) expected
+        if is_print then
+          cli_test name (CLI.parse_input input |> handle_table_prints) expected
+        else cli_test name (CLI.parse_input input) expected
       in
-      placeholder :: make_test primer t
+      placeholder :: make_test primer t is_print
 
 let fully_defined_generic =
   [
@@ -77,6 +83,41 @@ let def_tests =
         "no name error when blank spaces",
         "string   ",
         get_response "err_defn_no_name" );
+      ( false,
+        "cannot define the same type twice, end of defn",
+        " ",
+        get_response "indent_end" );
+      ( false,
+        "cannot define the same type twice, defn",
+        "def Person Name",
+        get_response "err_defn_already_exists" );
+    ] )
+
+let malformed_assign_states =
+  ( [
+      "def City Name";
+      "int sq_footage";
+      "float coordinates";
+      "string nickname";
+      "";
+    ],
+    [
+      ( true,
+        "assign with no extra terms",
+        "assign ",
+        get_response "err_assign_empty" );
+      ( true,
+        "assign with type and no id",
+        "assign City",
+        get_response "err_assign_no_id" );
+      ( true,
+        "assign with incorrect type and no id",
+        "assign Coty",
+        get_response "err_assign_no_id" );
+      ( true,
+        "assign with incorrect type and no id",
+        "assign Coty Ithaca",
+        get_response "err_assign_DNE" );
     ] )
 
 let pre_defn_assign_tests =
@@ -162,33 +203,51 @@ let find_tests =
         get_response "err_find_invalid_comparison" );
       ( true,
         "incorrect find incorrect expr with and",
-        "find Type s < 4 and i =2 and f < 3",
+        "find Type s < 4 and i =2 and f <= 3",
         get_response "err_find_invalid_expr" );
       ( true,
-        "incorrect find incorrect expr with and",
-        "find Type s < 4 and i = 2 and f < 3",
+        "empty find expression",
+        "find ",
+        get_response "err_find_missing_type" );
+      ( true,
+        "empty expr with and",
+        "find Type  and   ",
         get_response "err_find_invalid_expr" );
     ] )
 
 let misc_tests =
   ( [],
-    [ (true, "help message is correct", "help", get_response "help_message") ]
-  )
+    [
+      (true, "help message is correct", "help", get_response "help_message");
+      ( true,
+        "unknown command error on random input",
+        "asdf",
+        get_response "err_unknown_command" );
+    ] )
 
-let rec gather_tests tests =
+let rec gather_tests_no_print tests =
   match tests with
   | [] -> []
-  | (primer, tests) :: t -> make_test primer tests :: gather_tests t
+  | (primer, tests) :: t ->
+      make_test primer tests false @ gather_tests_no_print t
 
-let suite =
-  "search test suite"
-  >::: ([
-          def_tests;
-          misc_tests;
-          pre_defn_assign_tests;
-          find_tests;
-          assign_type_tests;
-        ]
-       |> gather_tests |> List.flatten)
+let gather_tests_with_print tests =
+  match tests with
+  | [] -> []
+  | (primer, tests) :: t ->
+      make_test primer tests true @ gather_tests_no_print t
 
+let tests =
+  ([
+     def_tests;
+     misc_tests;
+     pre_defn_assign_tests;
+     find_tests;
+     assign_type_tests;
+     malformed_assign_states;
+   ]
+  |> gather_tests_no_print)
+  @ ([] |> gather_tests_with_print)
+
+let suite = "search test suite" >::: tests
 let _ = run_test_tt_main suite

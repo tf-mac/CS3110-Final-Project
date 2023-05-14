@@ -14,12 +14,20 @@
     "err_unknown_command": "Unknown command. Type help for a list of commands\n|> ",
     "err_at_empty": "Please enter what the type and id of which to get an instance\n|> ",
     "err_at_no_id": "Please enter an id of the instance you which to get\n|> ",
+    "err_at_column_not_int": "Column number should be an int\n|> ",
     "err_at_invalid_type": "No type of that name\n|> ",
+    "err_at_type_DNE": "No type of that name\n|> ",
+    "err_at_column_out_of_range": "Column out of range. Hint: Index starts at 0\n|> ",
+    "unbound_type": "<unbound type>\n|> ",
+    "unbound_val": "<unbound val>\n|> ",
+    "no_entry": "No entry\n|> ",
+    "err_find_missing_type": "Must specify type in find\n|> ",
     "err_find_invalid_expr": "Invalid comparison expression\n|> ",
     "err_find_invalid_comparison": "Invalid comparison, use <> = > < >= <=\n|> ",
     "err_find_invalid_type": "Cannot find type of that name\n|> ",
     "help_message": "\nTo define a custom dataframe, type the following,\nall valueNames must be unique:\ndef TypeName IdName\n   type valueName\n   ...\n   type valueName\n\n\nTo assign values to the custom types:\nassign TypeName IdValue\n   valueName = value\n   ...\n   valueName = value\n\nTo save to a file, use 'save <file>'\n\nTo find a file, type 'find TypeName expr'\n'expr' must be of the form: 'variable compare value' separated by spaces.\nValid compare opperators include <> = > < <= and >=\nexpr can be chained using 'and'\n\n|> ",
     "indent_end": "|    <|\n|> ",
     "indent": "|    ",
-    "default": "|> "
+    "default": "|> ",
+    "welcome": "\n\nWelcome to the 3110 Database Command Line\nPlease describe the data you want to store.\nType 'quit' to quit, 'help' for help.\n\n"
 }

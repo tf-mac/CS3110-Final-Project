@@ -19,10 +19,6 @@ bisect: bisect-clean
 bisect-clean:
 	rm -rf _coverage bisect*.coverage
 
-clean: bisect-clean
-	dune clean
-	rm -f search.zip
-
 doc:
 	dune build @doc
 

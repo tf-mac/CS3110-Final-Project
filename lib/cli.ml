@@ -24,52 +24,11 @@ module CLI = struct
   exception InvalidComparison
 
   let current_state = ref Default
-
-  let response_names =
-    [
-      "err_create_field_DNE";
-      "err_create_field_wrong_type";
-      "err_create_field_no_value";
-      "err_create_field_already_entered";
-      "err_assign_empty";
-      "err_assign_no_id";
-      "err_assign_DNE";
-      "err_defn_needs_type_name";
-      "err_defn_needs_ID_name";
-      "err_defn_already_exists";
-      "err_defn_no_name";
-      "err_defn_invalid_type";
-      "err_unknown_command";
-      "err_find_invalid_expr";
-      "err_find_invalid_comparison";
-      "err_find_invalid_type";
-      "err_at_no_id";
-      "help_message";
-      "indent_end";
-      "indent";
-      "default";
-    ]
-
-  let get_json_item file entry =
-    file |> to_assoc |> List.assoc entry |> to_string
-
   let file_name = "data/responses.json"
 
-  let rec build_response_assoc_list res_names res_assoc =
+  let get_response response =
     let file = Yojson.Basic.from_file file_name in
-    match res_names with
-    | [] -> res_assoc
-    | h :: t ->
-        (h, get_json_item file h) :: res_assoc |> build_response_assoc_list t
-
-  let responses = build_response_assoc_list response_names []
-
-  let rec find_response key lst =
-    match lst with
-    | [] -> failwith "response not found"
-    | (k, v) :: t -> if k = key then v else find_response key t
-
-  let get_response response = find_response response responses
+    file |> to_assoc |> List.assoc response |> to_string
 
   let reset () =
     current_state := Default;
@@ -92,7 +51,7 @@ module CLI = struct
     | Chars -> Char (if String.length v = 1 then v.[0] else raise ParseError)
     | Ids ->
         Id
-          (match String.split_on_char '@' (String.trim v) with
+          (match v |> String.split_on_char '@' |> List.map String.trim with
           | [] | [ _ ] | _ :: _ :: _ :: _ -> raise ParseError
           | [ hd; tl ] -> (hd, String tl))
 
@@ -150,10 +109,10 @@ module CLI = struct
                   [
                     ( (match Tbl.header t with
                       | Type (n, _) :: tl -> n
-                      | _ -> raise ParseError),
+                      | _ -> failwith "impossible" [@coverage off]),
                       String id );
                   ] );
-            "|    "
+            get_response "indent"
         | None -> get_response "err_assign_DNE")
   (* "That type does not exist\n|> " *)
 
@@ -188,7 +147,7 @@ module CLI = struct
             current_state := BuildType (name, id, types);
             get_response
               "err_defn_invalid_type" (* "Not a recognized type\n|    " *)
-        | _ -> raise (Failure "Should be impossible"))
+        | _ -> raise (Failure "Should be impossible") [@coverage off])
 
   let process_type input =
     match List.filter (fun s -> s <> "") input with
@@ -226,29 +185,31 @@ module CLI = struct
         | Some x -> (
             let row = Tbl.at x (String id) in
             match int_of_string_opt col with
-            | None -> "Column number should be an int"
+            | None ->
+                get_response "err_at_column_not_int"
+                (* "Column number should be an int" *)
             | Some i -> (
                 match List.nth_opt row i with
                 | Some e -> (
                     match e with
-                    | None -> "No entry"
+                    | None -> get_response "no_entry"
                     | Some e -> (
                         match e with
                         | Id (name, row) -> (
                             entry_to_string e ^ "="
                             ^
                             match DB.get_reference e !db with
-                            | exception Not_found -> "<unbound type>"
+                            | exception Not_found -> get_response "unbound_type"
                             | l, r -> (
                                 "\n"
                                 ^ build_row (optionize l)
                                 ^
                                 match r with
-                                | None -> "<unbound val>"
+                                | None -> get_response "unbound_val"
                                 | Some v -> build_row v))
                         | _ -> entry_to_string e))
-                | None -> "Column out of range. Hint: Index starts at 0"))
-        | None -> "No type named " ^ name)
+                | None -> get_response "err_at_column_out_of_range"))
+        | None -> get_response "err_at_type_DNE")
 
   let split_on_substring sub str =
     let idxs = ref [ 0 ] in
@@ -263,7 +224,7 @@ module CLI = struct
       match idxs with
       | [] -> []
       | s :: e :: t -> String.sub str s (e - s) :: create_lst t sub_len str
-      | _ -> failwith "odd"
+      | _ -> failwith "odd" [@coverage off]
     in
     create_lst !idxs sub_len str
 
@@ -283,26 +244,28 @@ module CLI = struct
             | ">=" -> GTE
             | _ -> raise InvalidComparison),
             value )
-      | _ -> failwith "should be impossible"
+      | _ -> failwith "should be impossible" [@coverage off]
 
   let process_find lst =
     let cleaned_lst =
       lst |> List.map String.trim |> List.filter (fun s -> s <> "")
     in
-    match DB.get_table (List.hd cleaned_lst) !db with
-    | None -> get_response "err_find_invalid_type"
-    | Some type_table -> (
-        try
-          cleaned_lst |> List.tl
-          |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
-          |> split_on_substring " and " |> List.map String.trim
-          |> List.filter (fun s -> s <> "")
-          |> (fun lst -> if lst = [] then raise InvalidExpr else lst)
-          |> List.map parse_compare_exp
-          |> Tbl.process_constraints type_table
-        with
-        | InvalidExpr -> get_response "err_find_invalid_expr"
-        | InvalidComparison -> get_response "err_find_invalid_comparison")
+    if cleaned_lst = [] then get_response "err_find_missing_type"
+    else
+      match DB.get_table (List.hd cleaned_lst) !db with
+      | None -> get_response "err_find_invalid_type"
+      | Some type_table -> (
+          try
+            cleaned_lst |> List.tl
+            |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
+            |> split_on_substring "and" |> List.map String.trim
+            |> List.filter (fun s -> s <> "")
+            |> (fun lst -> if lst = [] then raise InvalidExpr else lst)
+            |> List.map parse_compare_exp
+            |> Tbl.process_constraints type_table
+          with
+          | InvalidExpr -> get_response "err_find_invalid_expr"
+          | InvalidComparison -> get_response "err_find_invalid_comparison")
 
   (** [parse_input input] takes in new input and determines the relevant command*)
   let parse_input input =
@@ -326,11 +289,13 @@ end
 (** [main ()] prompts for the script to start, then starts it. *)
 
 let main () =
-  print_string
-    "\n\n\
-     Welcome to the 3110 Database Command Line\n\
-     Please describe the data you want to store.\n\
-     Type 'quit' to quit, 'help' for help.\n\n";
+  let file_name = "data/responses.json" in
+  let welcom_string =
+    let file = Yojson.Basic.from_file file_name in
+    file |> Yojson.Basic.Util.to_assoc |> List.assoc "welcome"
+    |> Yojson.Basic.Util.to_string
+  in
+  print_string welcom_string;
   print_string "|> ";
   while true do
     read_line () |> CLI.parse_input |> print_string
