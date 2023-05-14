@@ -171,17 +171,17 @@ module Database (Table : Table) = struct
     | <span data-count="0">_</span> -&gt; raise TableExists
 
   let build_table database table name =
-    <span data-count="75">m</span>atch
+    <span data-count="48">m</span>atch
       List.find (fun a -&gt; <span data-count="0">m</span>atch a with <span data-count="0">t</span>name, t -&gt; name = tname) database
     with
-    | <span data-count="75">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="75">y</span> table)) :: database
+    | <span data-count="48">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="48">y</span> table)) :: database
     | <span data-count="0">_</span> -&gt; raise TableExists
 
   let drop_table name database =
     <span data-count="0">L</span>ist.filter (fun a -&gt; <span data-count="0">m</span>atch a with <span data-count="0">t</span>name, t -&gt; name &lt;&gt; tname) database
 
   let get_table name database =
-    <span data-count="185">m</span>atch List.assoc_opt name database with <span data-count="100">S</span>ome x -&gt; Some !x | <span data-count="85">N</span>one -&gt; None
+    <span data-count="120">m</span>atch List.assoc_opt name database with <span data-count="66">S</span>ome x -&gt; Some !x | <span data-count="54">N</span>one -&gt; None
 
   (*Currently doesn't work...*)
   let get_reference ent database = <span data-count="0">r</span>aise (Failure "Unimplemented")
@@ -199,9 +199,9 @@ module Database (Table : Table) = struct
     | <span data-count="0">_</span> :: tl -&gt; add_entry table_name new_row tl
 
   let add_named_entry table_name new_row database =
-    <span data-count="35">m</span>atch List.assoc_opt table_name database with
+    <span data-count="24">m</span>atch List.assoc_opt table_name database with
     | <span data-count="0">N</span>one -&gt; raise Not_found
-    | <span data-count="35">S</span>ome x -&gt; x := Table.insert_name<span data-count="35">d</span> !x new_row
+    | <span data-count="24">S</span>ome x -&gt; x := Table.insert_name<span data-count="24">d</span> !x new_row
 end
 </code></pre>
       </div>

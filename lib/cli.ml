@@ -90,7 +90,11 @@ module CLI = struct
         | Some b -> Bool b
         | None -> raise ParseError)
     | Chars -> Char (if String.length v = 1 then v.[0] else raise ParseError)
-    | Ids -> raise ParseError
+    | Ids ->
+        Id
+          (match String.split_on_char '@' (String.trim v) with
+          | [] | [ _ ] | _ :: _ :: _ :: _ -> raise ParseError
+          | [ hd; tl ] -> (hd, String tl))
 
   let rec build_instance (name, table, vals) input =
     match
