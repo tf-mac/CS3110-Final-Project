@@ -31,7 +31,6 @@ module Database (Table : Table) = struct
   let get_table name database =
     match List.assoc_opt name database with Some x -> Some !x | None -> None
 
-  (*Currently doesn't work...*)
   let get_reference ent database =
     match ent with
     | Id (tbl, id) -> (
