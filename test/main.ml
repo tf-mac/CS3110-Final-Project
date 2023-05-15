@@ -3,6 +3,12 @@ open RelationalDatabase.Tables
 open RelationalDatabase.Database
 open RelationalDatabase.Utils
 
+let trim str =
+  str |> String.split_on_char '\t' |> List.map String.trim
+  |> List.filter (fun a -> a <> "")
+  |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
+  |> String.trim
+
 module TableTests (T : Table) = struct
   (*Table Tests*)
 
@@ -33,7 +39,7 @@ module TableTests (T : Table) = struct
     name >:: fun _ -> assert_equal expected (T.delete table id)
 
   let test_table_to_string name table expected =
-    name >:: fun _ -> assert_equal expected (T.table_to_string table)
+    name >:: fun _ -> assert_equal expected (T.table_to_string table |> trim)
 
   let test_exists_exception name table table_name expected =
     name >:: fun _ ->
@@ -73,11 +79,8 @@ module TableTests (T : Table) = struct
   let elist_exception2 = [ ("name", String "John") ]
   let elist_for_at = [ Some (String "John") ]
   let insert_named = T.insert_named table elist
-  let at_f = T.delete table (String "name")
-  let x = T.table_to_string at_f
   let partial_table = T.empty [ Type ("name", Strings) ]
   let partial_insert = T.insert_named partial_table elist
-  let test_table_d fun_name d = fun_name >:: fun _ -> print_endline x
 
   let table_tests =
     [
@@ -97,6 +100,8 @@ module TableTests (T : Table) = struct
           Id ("Person", String "Johnathan");
         ]
         insert;
+      test_insert_exception "IndexExists thrown on insert" insert_named
+        [ String "John" ] IndexExists;
       test_at "testing at for simple table" partial_insert (String "John")
         elist_for_at;
       test_at_exception "testing invalid string for at" insert_named
@@ -112,7 +117,8 @@ module TableTests (T : Table) = struct
       test_exists "testing exists on existing table" table "name" Strings;
       test_exists_exception "testing invalid exists on table" table "i"
         TypeMismatch;
-      test_table_d "string 2" x;
+      test_table_to_string "testing empty table to string" empty_table "";
+      test_table_to_string "testing table to string" table "string name int age";
     ]
 end
 
@@ -176,6 +182,10 @@ module DatabaseTests (T : Table) = struct
     assert_raises expected (fun () ->
         PersonDB.add_named_entry table_name new_row database)
 
+  let test_database_to_string fun_name database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.db_to_string database |> trim) expected
+
   let database_person_ent_list = [ Type ("name", Strings); Type ("age", Ints) ]
 
   let database_airport_ent_list =
@@ -204,8 +214,7 @@ module DatabaseTests (T : Table) = struct
   let person_database = PersonDB.add_table empty new_table "Person"
   let airport_database = PersonDB.add_table empty table2 "Airport"
   let large_database = PersonDB.add_table person_database table2 "Airport"
-  let d = PersonDB.db_to_string empty
-  let test_d fun_name = fun_name >:: fun _ -> print_endline d
+  let small_database = PersonDB.add_table empty t ""
 
   let database_tests =
     [
@@ -243,11 +252,25 @@ module DatabaseTests (T : Table) = struct
         "Invalid"
         [ ("name", String "location") ]
         person_database Not_found;
+      test_database_to_string "Testing to string on empty database" empty "";
+      test_database_to_string "Testing db_to_string" small_database
+        "Table: \n\nstring name";
       test_get_reference "Test Get reference"
         (Id ("Person", String "John"))
         add_table_database
         ( [ Type ("name", Strings); Type ("age", Ints) ],
           Some [ Some (String "John"); Some (Int 25) ] );
+      test_get_reference_exception "Testing Not Found for get reference"
+        (Id ("Invalid", String "John"))
+        add_table_database Not_found;
+      test_get_reference "Testing Type Mismatch for get reference"
+        (Id ("Person", String "Invalid"))
+        add_table_database
+        ([ Type ("name", Strings); Type ("age", Ints) ], None);
+      test_add_entry "Testing add_entry" "Person" [ String "Amy"; Int 30 ]
+        person_database ();
+      test_add_entry_exception "Testing Not_found in add_entry" "invalid"
+        [ String "Amy"; Int 30 ] person_database Not_found;
     ]
 end
 
