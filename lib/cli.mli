@@ -1,15 +1,5 @@
-(*type input = Empty | Malformed | Valid of string list
-
-  val user_defined_types : string list ref
-  val lst_to_string : string list -> string
-  val check_value_defn : string list -> input
-  val parse_value_defn : string -> input
-  val add_type : string -> unit
-  val print_state : string -> string
-  val read_value_defn : string -> string list list
-  val parse_constructor_defn : string list -> string list list
-  val read_make : string -> string -> string list
-  val read_input : string -> unit*)
+(** This module handles the command line interface, it allows easy use of the backend infrastructure
+    for storing and retrieving new types and data.*)
 
 val main : unit -> unit
 (** [main ()] parses the user's input from the terminal using 

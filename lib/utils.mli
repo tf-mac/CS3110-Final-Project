@@ -1,20 +1,10 @@
-type types =
-  | Strings
-  | Floats
-  | Ints
-  | Chars
-  | Bools
-  | Ids 
- (** Representation of the type of some field*)
+(** This module holds utilities (both functions and types) that many other modules need.*)
 
-type comparison =
-  | LT
-  | LTE
-  | EQ
-  | NEQ
-  | GT
-  | GTE  
+(** Representation of the type of some field*)
+type types = Strings | Floats | Ints | Chars | Bools | Ids
+
 (** Representation of some comparison operation*)
+type comparison = LT | LTE | EQ | NEQ | GT | GTE
 
 exception IndexExists
 (** [IndexExists] occurs when trying to replace an index which already exists*)
@@ -22,6 +12,7 @@ exception IndexExists
 exception TypeMismatch
 (** [TypeMismatch] occurs when some typing error occurs, e.g. true > "cat"*)
 
+(** The core of this project! The type holding every entry in every table*)
 type entry =
   | String of string
   | Float of float
@@ -30,7 +21,6 @@ type entry =
   | Bool of bool
   | Id of (string * entry)
   | Type of (string * types)
-      (** The core of this project! The type holding every entry in every table*)
 
 val process_entry : string -> types -> entry
 (** Turns a string into the given entry type.

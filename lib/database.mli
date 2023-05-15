@@ -1,3 +1,6 @@
+(** This module handles the complete backend for data storage. It is able to handle multiple types
+    and build tables accordingly, data can be accessed and added to any type in various ways*)
+
 open Utils
 open Tables
 

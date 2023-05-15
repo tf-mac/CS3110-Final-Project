@@ -1,3 +1,37 @@
+(* We tested our code primarily using OUnit with some manual testing
+   of the command line interface to ensure they were equivalently implemented.
+   All modules were tested in some form by OUnit, the Table module was tested
+   directly and the Utils module was tested indirectly by testing the modules
+   that used Util.
+
+   The CLI and Database modules were tested with OUnit with at least 95% test
+   coverage using glass box testing (according to bisect excluding defensive code).
+
+   The Database and Table modules were also tested using black box testing to test
+   edge cases from the specification. Those specifications were also tested to make
+   sure that any error they were supposed to throw worked correctly. The CLI module
+   was tested with OUnit to make sure that the correct messages were returned
+   depending on the internal state of CLI and the input message.
+
+   The only part of the code that was tested manually was the ‘quit’ statement in
+   CLI (because it would have quit the program if we tested it in OUnit) and the
+   ‘main’ function that took in inputs from the terminal and printed the responses.
+   We tested this manually to make sure that the terminal inputs and  outputs
+   behaved the same as the OUnit to ensure the command line interface worked
+   correctly.
+
+   This testing strategy demonstrated that the system is correct because we
+   achieved over 90% coverage over all of our modules and they acted correctly.
+   Additionally, our most important modules (that depended on others) were tested to
+   >95% coverage which gives us additional confidence that the most important parts
+   of our system work correctly.
+
+   This gives us a lot of confidence that the whole system is correct.
+   Additionally, we tested edge cases wherever possible which ensured that even
+   weird inputs worked according to specifications. Finally, the manual testing of
+   the command line interface ensured that the OUnit tests were correctly
+   transferred to an actual user using the program through the terminal. *)
+
 open OUnit2
 open RelationalDatabase.Tables
 open RelationalDatabase.Database

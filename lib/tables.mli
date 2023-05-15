@@ -1,3 +1,6 @@
+(** This module handles the backend implementation for storing data. It holds information in a table
+     that can be accesess and modified in various ways.*)
+
 open Utils
 
 module type Table = sig
@@ -26,16 +29,16 @@ module type Table = sig
   val table_to_string : t -> string
   (** [table_to_string t]  returns a string representation of [t]*)
 
+  val process_constraints : t -> (string * comparison * string) list -> string
   (** Processes a given list of constraints
      Raises [Not_found] if a constraint isn't found
      Raises [TypeMismatch] if the comparison value doesn't match the header*)
-  val process_constraints : t -> (string * comparison * string) list -> string
 
-  (** Returns the header of the table*)
   val header : t -> entry list
+  (** Returns the header of the table*)
 
-  (** Returns the type of the named column, if it exists. If not, raises [TypeMismatch]*)
   val exists : t -> string -> types
+  (** Returns the type of the named column, if it exists. If not, raises [TypeMismatch]*)
 end
 
 module HashTable : Table
