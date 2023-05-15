@@ -122,7 +122,169 @@ module TableTests (T : Table) = struct
     ]
 end
 
+module ListTableTests = TableTests (ListTable)
+module HashTableTests = TableTests (HashTable)
 
+module DatabaseTests (T : Table) = struct
+  module PersonDB = Database (T)
 
-let suite = "search test suite" >::: tests
+  let test_empty_database name expected =
+    name >:: fun _ -> assert_equal expected PersonDB.empty
+
+  let test_add_table fun_name database table name expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.add_table database table name) expected
+
+  let test_add_table_exception fun_name database table name expected =
+    fun_name >:: fun _ ->
+    assert_raises expected (fun () -> PersonDB.add_table database table name)
+
+  let test_build_table fun_name database table name expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.build_table database table name) expected
+
+  let test_build_table_exception fun_name database table name expected =
+    fun_name >:: fun _ ->
+    assert_raises expected (fun () -> PersonDB.build_table database table name)
+
+  let test_drop_table fun_name name database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.drop_table name database) expected
+
+  let test_get_table fun_name name database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.get_table name database) expected
+
+  let test_get_reference fun_name ent database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.get_reference ent database) expected
+
+  let test_add_entry fun_name table_name new_row database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.add_entry table_name new_row database) expected
+
+  let test_add_entry_exception fun_name table_name new_row database expected =
+    fun_name >:: fun _ ->
+    assert_raises expected (fun () ->
+        PersonDB.add_entry table_name new_row database)
+
+  let test_get_reference_exception fun_name ent database expected =
+    fun_name >:: fun _ ->
+    assert_raises expected (fun () -> PersonDB.get_reference ent database)
+
+  let test_add_named_entry fun_name table_name new_row database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.add_named_entry table_name new_row database) expected
+
+  let test_add_named_entry_exception fun_name table_name new_row database
+      expected =
+    fun_name >:: fun _ ->
+    assert_raises expected (fun () ->
+        PersonDB.add_named_entry table_name new_row database)
+
+  let test_database_to_string fun_name database expected =
+    fun_name >:: fun _ ->
+    assert_equal (PersonDB.db_to_string database |> trim) expected
+
+  let database_person_ent_list = [ Type ("name", Strings); Type ("age", Ints) ]
+
+  let database_airport_ent_list =
+    [
+      Type ("location", Strings);
+      Type ("passengers", Strings);
+      Type ("delayed", Bools);
+    ]
+
+  let t = T.empty [ Type ("name", Strings) ]
+  let new_table = T.empty [ Type ("name", Strings); Type ("age", Ints) ]
+  let elist = [ ("name", String "John"); ("age", Int 25) ]
+  let add_table = T.insert_named new_table elist
+  let reference = ([ String "name" ], Some [ Some (String "Person") ])
+
+  let table2 =
+    T.empty
+      [
+        Type ("location", Strings);
+        Type ("passengers", Strings);
+        Type ("delayed", Bools);
+      ]
+
+  let empty = PersonDB.empty
+  let add_table_database = PersonDB.add_table empty add_table "Person"
+  let person_database = PersonDB.add_table empty new_table "Person"
+  let airport_database = PersonDB.add_table empty table2 "Airport"
+  let large_database = PersonDB.add_table person_database table2 "Airport"
+  let small_database = PersonDB.add_table empty t ""
+
+  let database_tests =
+    [
+      test_empty_database "empty test" empty;
+      test_add_table "Testing add_table" empty new_table "Person"
+        person_database;
+      test_add_table "Testing add_table to non-empty database" person_database
+        table2 "Airport" large_database;
+      test_add_table_exception
+        "Raising failure by adding existing table to database" person_database
+        new_table "Person" PersonDB.TableExists;
+      test_drop_table "Testing drop_table" "Person" person_database empty;
+      test_drop_table "Testing drop_table on empty table" "Person" empty empty;
+      test_drop_table "Testing drop_table with invalid table" "Invalid"
+        person_database person_database;
+      test_drop_table "Testing drop_table on multi-table database" "Person"
+        large_database airport_database;
+      test_get_table "Testing Valid get_table" "Person" person_database
+        (Some new_table);
+      test_get_table "Testing Empty table for get_table" "Person" empty None;
+      test_get_table "Testing Invalid table for get_table" "Airport"
+        person_database None;
+      test_get_table "Testing Valid get_table in multitable database" "Airport"
+        large_database (Some table2);
+      test_build_table "Testing Valid build_table on empty database" empty
+        database_person_ent_list "Person" person_database;
+      test_build_table "Testing Valid build_table on existing database"
+        person_database database_airport_ent_list "Airport" large_database;
+      test_build_table_exception "Testing TableExists exception on build_table"
+        person_database database_person_ent_list "Person" PersonDB.TableExists;
+      test_add_named_entry "Testing add_named_entry" "Person"
+        [ ("name", String "location") ]
+        person_database ();
+      test_add_named_entry_exception "Testing Not_found in add_named_entry"
+        "Invalid"
+        [ ("name", String "location") ]
+        person_database Not_found;
+      test_database_to_string "Testing to string on empty database" empty "";
+      test_database_to_string "Testing db_to_string" small_database
+        "Table: \n\nstring name";
+      test_get_reference "Test Get reference"
+        (Id ("Person", String "John"))
+        add_table_database
+        ( [ Type ("name", Strings); Type ("age", Ints) ],
+          Some [ Some (String "John"); Some (Int 25) ] );
+      test_get_reference_exception "Testing Not Found for get reference"
+        (Id ("Invalid", String "John"))
+        add_table_database Not_found;
+      test_get_reference "Testing Type Mismatch for get reference"
+        (Id ("Person", String "Invalid"))
+        add_table_database
+        ([ Type ("name", Strings); Type ("age", Ints) ], None);
+      test_add_entry "Testing add_entry" "Person" [ String "Amy"; Int 30 ]
+        person_database ();
+      test_add_entry_exception "Testing Not_found in add_entry" "invalid"
+        [ String "Amy"; Int 30 ] person_database Not_found;
+    ]
+end
+
+module DatabaseListTable = DatabaseTests (ListTable)
+module DatabaseHashTable = DatabaseTests (HashTable)
+
+let suite =
+  "test suite"
+  >::: List.flatten
+         [
+           ListTableTests.table_tests;
+           HashTableTests.table_tests;
+           DatabaseListTable.database_tests;
+           DatabaseHashTable.database_tests;
+         ]
+
 let _ = run_test_tt_main suite
