@@ -679,6 +679,12 @@ let at_tests =
         "at Type ID1 10",
         get_response "err_at_column_out_of_range" );
       ( true,
+        "test at statement with out of range column number",
+        "at Type ID1",
+        "string ID\tint i\t\tfloat f\t\tchar c\t\tbool b\t\tstring s\tid \
+         d\t\t\n\n\n\
+         ID1\t\t10\t\t3.14\t\ta\t\ttrue\t\thello there\t\t\t\n\n" );
+      ( true,
         "test at statement on no entry column",
         "at Type ID1 6",
         get_response "no_entry" );

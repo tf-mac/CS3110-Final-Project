@@ -17,8 +17,15 @@ val main : unit -> unit
 
 module type CliHandler = sig
   val parse_input : string -> string
+  (**[parse_input input] takes the string [input] and uses the internal state to produce an output string, which is equivalent to what would be printed in a CLI. Modifies internal state accordingly*)
+
   val get_response : string -> string
+  (**[get_response addr] reads the responses json, giving a response string for a response string
+      Raises [Not_found] if [addr] is an invalid response*)
+
   val reset : unit -> unit
+  (**[reset] changes the internal state to have an empty database and default internal state
+          *)
 end
 
 module CLI : CliHandler

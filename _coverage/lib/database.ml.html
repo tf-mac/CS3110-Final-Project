@@ -168,54 +168,54 @@ module Database (Table : Table) = struct
   let empty = []
 
   let add_table database table name : database =
-    <span data-count="36">m</span>atch
-      List.find (fun a -&gt; <span data-count="10">m</span>atch a with <span data-count="10">t</span>name, t -&gt; name = tname) database
+    <span data-count="18">m</span>atch
+      List.find (fun a -&gt; <span data-count="5">m</span>atch a with <span data-count="5">t</span>name, t -&gt; name = tname) database
     with
-    | <span data-count="34">e</span>xception Not_found -&gt; (name, ref table) :: database
-    | <span data-count="2">_</span> -&gt; raise TableExists
+    | <span data-count="17">e</span>xception Not_found -&gt; (name, ref table) :: database
+    | <span data-count="1">_</span> -&gt; raise TableExists
 
   let build_table database table name =
     <span data-count="132">m</span>atch
-      List.find (fun a -&gt; <span data-count="4">m</span>atch a with <span data-count="4">t</span>name, t -&gt; name = tname) database
+      List.find (fun a -&gt; <span data-count="2">m</span>atch a with <span data-count="2">t</span>name, t -&gt; name = tname) database
     with
-    | <span data-count="130">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="130">y</span> table)) :: database
-    | <span data-count="2">_</span> -&gt; raise TableExists
+    | <span data-count="131">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="131">y</span> table)) :: database
+    | <span data-count="1">_</span> -&gt; raise TableExists
 
   let drop_table name database =
-    <span data-count="8">L</span>ist.filter (fun a -&gt; <span data-count="8">m</span>atch a with <span data-count="8">t</span>name, t -&gt; name &lt;&gt; tname) database
+    <span data-count="4">L</span>ist.filter (fun a -&gt; <span data-count="4">m</span>atch a with <span data-count="4">t</span>name, t -&gt; name &lt;&gt; tname) database
 
   let get_table name database =
-    <span data-count="359">m</span>atch List.assoc_opt name database with <span data-count="215">S</span>ome x -&gt; Some !x | <span data-count="144">N</span>one -&gt; None
+    <span data-count="361">m</span>atch List.assoc_opt name database with <span data-count="217">S</span>ome x -&gt; Some !x | <span data-count="144">N</span>one -&gt; None
 
   let get_reference ent database =
-    <span data-count="12">m</span>atch ent with
-    | <span data-count="12">I</span>d (tbl, id) -&gt; (
+    <span data-count="9">m</span>atch ent with
+    | <span data-count="9">I</span>d (tbl, id) -&gt; (
         let tbl =
           match get_table tbl database with
-          | <span data-count="2">N</span>one -&gt; raise Not_found
-          | <span data-count="10">S</span>ome v -&gt; v
+          | <span data-count="1">N</span>one -&gt; raise Not_found
+          | <span data-count="8">S</span>ome v -&gt; v
         in
-        ( Table.heade<span data-count="10">r</span> tbl,
-          match Table.at tbl id with <span data-count="5">e</span>xception Not_found -&gt; None | <span data-count="5">v</span> -&gt; Some v
+        ( Table.heade<span data-count="8">r</span> tbl,
+          match Table.at tbl id with <span data-count="4">e</span>xception Not_found -&gt; None | <span data-count="4">v</span> -&gt; Some v
         ))
     | <span data-count="0">_</span> -&gt; raise TypeMismatch
 
   let rec db_to_string database =
-    <span data-count="12">m</span>atch database with
-    | <span data-count="7">[</span>] -&gt; "\n"
-    | <span data-count="5">(</span>name, x) :: xs -&gt;
-        "Table: " ^ name ^ "\n\n" ^ Table.table_to_strin<span data-count="5">g</span> !x ^ db_to_strin<span data-count="5">g</span> xs
+    <span data-count="9">m</span>atch database with
+    | <span data-count="5">[</span>] -&gt; "\n"
+    | <span data-count="4">(</span>name, x) :: xs -&gt;
+        "Table: " ^ name ^ "\n\n" ^ Table.table_to_strin<span data-count="4">g</span> !x ^ db_to_strin<span data-count="4">g</span> xs
 
   let rec add_entry table_name new_row database =
-    <span data-count="6">m</span>atch database with
-    | <span data-count="2">[</span>] -&gt; raise Not_found
-    | <span data-count="4">(</span>a, b) :: tl when a = table_name -&gt; <span data-count="2">b</span> := Table.inser<span data-count="2">t</span> !b new_row
-    | <span data-count="2">_</span> :: tl -&gt; add_entry table_name new_row tl
+    <span data-count="3">m</span>atch database with
+    | <span data-count="1">[</span>] -&gt; raise Not_found
+    | <span data-count="2">(</span>a, b) :: tl when a = table_name -&gt; <span data-count="1">b</span> := Table.inser<span data-count="1">t</span> !b new_row
+    | <span data-count="1">_</span> :: tl -&gt; add_entry table_name new_row tl
 
   let add_named_entry table_name new_row database =
-    <span data-count="115">m</span>atch List.assoc_opt table_name database with
-    | <span data-count="2">N</span>one -&gt; raise Not_found
-    | <span data-count="113">S</span>ome x -&gt; x := Table.insert_name<span data-count="113">d</span> !x new_row
+    <span data-count="116">m</span>atch List.assoc_opt table_name database with
+    | <span data-count="1">N</span>one -&gt; raise Not_found
+    | <span data-count="115">S</span>ome x -&gt; x := Table.insert_name<span data-count="115">d</span> !x new_row
 end
 </code></pre>
       </div>

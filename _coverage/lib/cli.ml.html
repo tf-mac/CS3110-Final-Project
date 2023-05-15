@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cli.ml &mdash; Coverage report</title>
-    <meta name="description" content="95.53% coverage in lib/cli.ml">
+    <meta name="description" content="98.32% coverage in lib/cli.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,10 @@
           <span class="dirname">lib/</span>cli.ml
         </a>
       </h1>
-      <h2>95.53%</h2>
+      <h2>98.32%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:17.63%"></span>
-      <span class="unvisited" style="bottom:42.31%"></span>
-      <span class="unvisited" style="bottom:41.67%"></span>
       <span class="unvisited" style="bottom:33.97%"></span>
       <span class="unvisited" style="bottom:33.65%"></span>
     </div>
@@ -206,9 +204,9 @@
 <a id="L177"></a><span > </span>
 <a id="L178"></a><span class="visited"> </span>
 <a id="L179"></a><span > </span>
-<a id="L180"></a><span class="unvisited"> </span>
+<a id="L180"></a><span class="visited"> </span>
 <a id="L181"></a><span > </span>
-<a id="L182"></a><span class="unvisited"> </span>
+<a id="L182"></a><span class="visited"> </span>
 <a id="L183"></a><span class="visited"> </span>
 <a id="L184"></a><span class="visited"> </span>
 <a id="L185"></a><span > </span>
@@ -685,28 +683,28 @@ module CLI = struct
   let file_name = "data/responses.json"
 
   let get_response response =
-    <span data-count="1950">l</span>et file = Yojson.Basic.from_file file_name in
-    <span data-count="1950">f</span>ile |&gt; to_assoc |&gt; <span data-count="1950">L</span>ist.assoc response |&gt; <span data-count="1950">t</span>o_string
+    <span data-count="1995">l</span>et file = Yojson.Basic.from_file file_name in
+    <span data-count="1995">f</span>ile |&gt; to_assoc |&gt; <span data-count="1995">L</span>ist.assoc response |&gt; <span data-count="1995">t</span>o_string
 
   let reset () =
-    <span data-count="141">c</span>urrent_state := Default;
+    <span data-count="144">c</span>urrent_state := Default;
     db := DB.empty
 
   let parse_value v = function
-    | <span data-count="99">S</span>trings -&gt; String v
-    | <span data-count="108">I</span>nts -&gt; (
+    | <span data-count="102">S</span>trings -&gt; String v
+    | <span data-count="111">I</span>nts -&gt; (
         match int_of_string_opt v with
-        | <span data-count="102">S</span>ome i -&gt; Int i
+        | <span data-count="105">S</span>ome i -&gt; Int i
         | <span data-count="6">N</span>one -&gt; raise ParseError)
-    | <span data-count="105">F</span>loats -&gt; (
+    | <span data-count="108">F</span>loats -&gt; (
         match float_of_string_opt v with
-        | <span data-count="102">S</span>ome f -&gt; Float f
+        | <span data-count="105">S</span>ome f -&gt; Float f
         | <span data-count="3">N</span>one -&gt; raise ParseError)
-    | <span data-count="102">B</span>ools -&gt; (
+    | <span data-count="105">B</span>ools -&gt; (
         match bool_of_string_opt v with
-        | <span data-count="99">S</span>ome b -&gt; Bool b
+        | <span data-count="102">S</span>ome b -&gt; Bool b
         | <span data-count="3">N</span>one -&gt; raise ParseError)
-    | <span data-count="102">C</span>hars -&gt; Char (if String.lengt<span data-count="102">h</span> v = 1 then <span data-count="99">v</span>.[0] else <span data-count="3">r</span>aise ParseError)
+    | <span data-count="105">C</span>hars -&gt; Char (if String.lengt<span data-count="105">h</span> v = 1 then <span data-count="102">v</span>.[0] else <span data-count="3">r</span>aise ParseError)
     | <span data-count="15">I</span>ds -&gt;
         Id
           (match v |&gt; String.split_on_char '@' |&gt; <span data-count="15">L</span>ist.map String.trim with
@@ -714,29 +712,29 @@ module CLI = struct
           | <span data-count="9">[</span> hd; tl ] -&gt; (hd, String tl))
 
   let rec build_instance (name, table, vals) input =
-    <span data-count="654">m</span>atch
-      input |&gt; String.split_on_char '=' |&gt; <span data-count="654">L</span>ist.map String.trim
-      |&gt; <span data-count="654">L</span>ist.filter (fun s -&gt; <span data-count="1197">s</span> &lt;&gt; "")
+    <span data-count="672">m</span>atch
+      input |&gt; String.split_on_char '=' |&gt; <span data-count="672">L</span>ist.map String.trim
+      |&gt; <span data-count="672">L</span>ist.filter (fun s -&gt; <span data-count="1230">s</span> &lt;&gt; "")
     with
-    | <span data-count="111">[</span>] -&gt;
+    | <span data-count="114">[</span>] -&gt;
         DB.add_named_entry name vals !db;
-        <span data-count="111">c</span>urrent_state := Default;
+        <span data-count="114">c</span>urrent_state := Default;
         get_response "indent_end" (* "|    &lt;|\n|&gt; " *)
     | <span data-count="6">[</span> n ] -&gt;
         current_state := BuildInstance (name, table, vals);
         get_response "err_create_field_no_value"
         (* "Please input a variable and a value\n|    " *)
-    | <span data-count="537">n</span> :: v :: tl -&gt; (
+    | <span data-count="552">n</span> :: v :: tl -&gt; (
         match List.assoc_opt n vals with
-        | <span data-count="534">N</span>one -&gt; (
+        | <span data-count="549">N</span>one -&gt; (
             match Tbl.exists table n with
             | <span data-count="3">e</span>xception TypeMismatch -&gt;
                 current_state := BuildInstance (name, table, vals);
                 get_response "err_create_field_DNE"
                 (* "That field does not exist in this type\n|    " *)
-            | <span data-count="531">t</span> -&gt; (
+            | <span data-count="546">t</span> -&gt; (
                 match parse_value v t with
-                | <span data-count="510">x</span> -&gt;
+                | <span data-count="525">x</span> -&gt;
                     current_state := BuildInstance (name, table, (n, x) :: vals);
                     get_response "indent" (* "|    " *)
                 | <span data-count="21">e</span>xception ParseError -&gt;
@@ -750,23 +748,23 @@ module CLI = struct
             (* "This field has already been entered\n|    " *))
 
   let process_assign input =
-    <span data-count="147">m</span>atch input |&gt; List.map String.trim |&gt; <span data-count="147">L</span>ist.filter (fun s -&gt; <span data-count="285">s</span> &lt;&gt; "") with
+    <span data-count="150">m</span>atch input |&gt; List.map String.trim |&gt; <span data-count="150">L</span>ist.filter (fun s -&gt; <span data-count="291">s</span> &lt;&gt; "") with
     | <span data-count="3">[</span>] -&gt;
         get_response "err_assign_empty"
         (* "Please input a type name and id\n|&gt; " *)
     | <span data-count="6">[</span> name ] -&gt;
         get_response "err_assign_no_id"
         (* "Please input an id for this instance\n|&gt; " *)
-    | <span data-count="138">n</span>ame :: id :: tl -&gt; (
+    | <span data-count="141">n</span>ame :: id :: tl -&gt; (
         match DB.get_table name !db with
-        | <span data-count="135">S</span>ome t -&gt;
+        | <span data-count="138">S</span>ome t -&gt;
             current_state :=
               BuildInstance
                 ( name,
                   t,
                   [
                     ( (match Tbl.header t with
-                      | <span data-count="135">T</span>ype (n, _) :: tl -&gt; n
+                      | <span data-count="138">T</span>ype (n, _) :: tl -&gt; n
                       | _ -&gt; failwith "impossible" [@coverage off]),
                       String id );
                   ] );
@@ -775,30 +773,30 @@ module CLI = struct
   (* "That type does not exist\n|&gt; " *)
 
   let parse_type (typ, name) =
-    <span data-count="660">m</span>atch typ with
-    | <span data-count="123">"</span>int" -&gt; Type (name, Ints)
-    | <span data-count="123">"</span>float" -&gt; Type (name, Floats)
-    | <span data-count="108">"</span>string" -&gt; Type (name, Strings)
-    | <span data-count="96">"</span>bool" -&gt; Type (name, Bools)
-    | <span data-count="96">"</span>char" -&gt; Type (name, Chars)
-    | <span data-count="111">"</span>id" -&gt; Type (name, Ids)
+    <span data-count="678">m</span>atch typ with
+    | <span data-count="126">"</span>int" -&gt; Type (name, Ints)
+    | <span data-count="126">"</span>float" -&gt; Type (name, Floats)
+    | <span data-count="111">"</span>string" -&gt; Type (name, Strings)
+    | <span data-count="99">"</span>bool" -&gt; Type (name, Bools)
+    | <span data-count="99">"</span>char" -&gt; Type (name, Chars)
+    | <span data-count="114">"</span>id" -&gt; Type (name, Ids)
     | <span data-count="3">_</span> -&gt; raise ParseError
 
   let rec build_type (name, id, types) input =
-    <span data-count="789">m</span>atch
+    <span data-count="810">m</span>atch
       String.split_on_char ' ' input
-      |&gt; <span data-count="789">L</span>ist.map String.trim
-      |&gt; <span data-count="789">L</span>ist.filter (fun s -&gt; <span data-count="1461">s</span> &lt;&gt; "")
+      |&gt; <span data-count="810">L</span>ist.map String.trim
+      |&gt; <span data-count="810">L</span>ist.filter (fun s -&gt; <span data-count="1500">s</span> &lt;&gt; "")
     with
-    | <span data-count="126">[</span>] -&gt;
-        db := DB.build_tabl<span data-count="126">e</span> !db (Type (id, Strings) :: types) name;
+    | <span data-count="129">[</span>] -&gt;
+        db := DB.build_tabl<span data-count="129">e</span> !db (Type (id, Strings) :: types) name;
         current_state := Default;
         get_response "indent_end" (* "|    &lt;|\n|&gt; " *)
     | <span data-count="3">[</span> typ ] -&gt; get_response "err_defn_no_name"
     (* "Please enter a name for this field\n|    " *)
-    | <span data-count="660">t</span>yp :: field_name :: tl -&gt; (
+    | <span data-count="678">t</span>yp :: field_name :: tl -&gt; (
         match parse_type (typ, field_name) with
-        | <span data-count="657">T</span>ype _ as t -&gt;
+        | <span data-count="675">T</span>ype _ as t -&gt;
             current_state := BuildType (name, id, types @ [ t ]);
             get_response "indent" (* "|    " *)
         | <span data-count="3">e</span>xception ParseError -&gt;
@@ -808,36 +806,36 @@ module CLI = struct
         | _ -&gt; raise (Failure "Should be impossible") [@coverage off])
 
   let process_type input =
-    <span data-count="135">m</span>atch List.filter (fun s -&gt; <span data-count="267">s</span> &lt;&gt; "") input with
+    <span data-count="138">m</span>atch List.filter (fun s -&gt; <span data-count="273">s</span> &lt;&gt; "") input with
     | <span data-count="3">[</span>] -&gt; get_response "err_defn_needs_type_name"
     (* "Please enter a type name for the definition\n|&gt; " *)
     | <span data-count="3">[</span> name ] -&gt;
         get_response "err_defn_needs_ID_name"
         (* "Please enter a name for the ID of this type\n|&gt; " *)
-    | <span data-count="129">n</span>ame :: id :: tl -&gt; (
+    | <span data-count="132">n</span>ame :: id :: tl -&gt; (
         match DB.get_table name !db with
         | <span data-count="3">S</span>ome _ -&gt;
             get_response "err_defn_already_exists"
             (* "\n Type already defined\n|&gt; " *)
-        | <span data-count="126">N</span>one -&gt;
+        | <span data-count="129">N</span>one -&gt;
             current_state := BuildType (name, id, []);
             get_response "indent" (* "|    " *))
 
   let process_at input =
-    <span data-count="36">m</span>atch input |&gt; List.map String.trim |&gt; <span data-count="36">L</span>ist.filter (fun s -&gt; <span data-count="90">s</span> &lt;&gt; "") with
+    <span data-count="39">m</span>atch input |&gt; List.map String.trim |&gt; <span data-count="39">L</span>ist.filter (fun s -&gt; <span data-count="96">s</span> &lt;&gt; "") with
     | <span data-count="3">[</span>] -&gt;
         get_response "err_at_empty"
         (* "Please enter what the type and id of which to get an instance\n|&gt; " *)
     | <span data-count="3">[</span> name ] -&gt;
         get_response "err_at_no_id"
         (* "Please enter an id of the instance you which to get\n|&gt; " *)
-    | <span data-count="6">[</span> name; id ] -&gt; (
+    | <span data-count="9">[</span> name; id ] -&gt; (
         match DB.get_table name !db with
-        | <span data-count="3">S</span>ome x -&gt; (
+        | <span data-count="6">S</span>ome x -&gt; (
             try
-              (x |&gt; Tbl.header |&gt; <span data-count="0">o</span>ptionize |&gt; <span data-count="0">b</span>uild_ro<span data-count="0">w</span>)
+              (x |&gt; Tbl.header |&gt; <span data-count="3">o</span>ptionize |&gt; <span data-count="3">b</span>uild_ro<span data-count="3">w</span>)
               ^ "\n"
-              ^ (String id |&gt; Tbl.at x |&gt; <span data-count="0">b</span>uild_ro<span data-count="0">w</span>)
+              ^ (String id |&gt; Tbl.at x |&gt; <span data-count="3">b</span>uild_ro<span data-count="3">w</span>)
             with <span data-count="3">N</span>ot_found -&gt; get_response "err_at_id_DNE")
         | <span data-count="3">N</span>one -&gt;
             get_response "err_at_invalid_type" (* "No type of that name" *))
@@ -936,17 +934,17 @@ module CLI = struct
 
   (** [parse_input input] takes in new input and determines the relevant command*)
   let parse_input input =
-    <span data-count="1818">m</span>atch !current_state with
-    | <span data-count="654">B</span>uildInstance v -&gt; build_instance v input
-    | <span data-count="789">B</span>uildType v -&gt; build_type v input
-    | <span data-count="375">D</span>efault -&gt; (
+    <span data-count="1866">m</span>atch !current_state with
+    | <span data-count="672">B</span>uildInstance v -&gt; build_instance v input
+    | <span data-count="810">B</span>uildType v -&gt; build_type v input
+    | <span data-count="384">D</span>efault -&gt; (
         match String.split_on_char ' ' input with
         | "quit" :: tl -&gt; exit 0 [@coverage off]
         | <span data-count="3">"</span>help" :: tl -&gt; get_response "help_message"
-        | <span data-count="135">"</span>def" :: tl -&gt; process_type tl
-        | <span data-count="147">"</span>assign" :: tl -&gt; process_assign tl
+        | <span data-count="138">"</span>def" :: tl -&gt; process_type tl
+        | <span data-count="150">"</span>assign" :: tl -&gt; process_assign tl
         | <span data-count="3">"</span>print" :: tl -&gt; DB.db_to_strin<span data-count="3">g</span> !db ^ "|&gt; "
-        | <span data-count="36">"</span>at" :: tl -&gt; process_at tl
+        | <span data-count="39">"</span>at" :: tl -&gt; process_at tl
         | <span data-count="45">"</span>find" :: tl -&gt; process_find tl
         | <span data-count="6">_</span> -&gt;
             get_response "err_unknown_command"
