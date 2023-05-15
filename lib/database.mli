@@ -41,5 +41,6 @@ module Database (Table : Table) : sig
   val add_entry : string -> entry list -> database -> unit
 
   (*[add_named_entry name new_row database] adds [new_row] to the table with [name] in [database]*)
+
   val add_named_entry : string -> (string * entry) list -> database -> unit
 end

@@ -59,6 +59,12 @@ let rec reorder_list (a : (string * entry) list) = function
       vl :: reorder_list rest tl
   | _ -> raise TypeMismatch
 
+let rec get_type_index cnt name = function
+  | [] -> raise Not_found
+  | Type (n, _) :: tl ->
+      if n = name then cnt else get_type_index (cnt + 1) name tl
+  | _ -> raise TypeMismatch
+
 module type Table = sig
   type t
 
@@ -68,6 +74,7 @@ module type Table = sig
   val at : t -> entry -> entry option list
   val delete : t -> entry -> t
   val table_to_string : t -> string
+  val process_constraints : t -> (string * comparison * string) list -> string
   val header : t -> entry list
   val exists : t -> string -> types
 end
@@ -95,7 +102,9 @@ module ListTable : Table = struct
     let name, value = List.hd elist in
     match List.find (fun a -> List.hd a = Some value) table with
     | x -> raise IndexExists
-    | exception Not_found -> table @ [ reorder_list elist (List.hd table) ]
+    | exception Not_found ->
+        table
+        @ [ assert_types (List.hd table) (reorder_list elist (List.hd table)) ]
 
   let at (table : t) id =
     List.find
@@ -137,6 +146,27 @@ module ListTable : Table = struct
       | _ :: tl -> follow_header tl
     in
     follow_header (header table)
+
+  let rec process_constraints tbl lst =
+    match lst with
+    | [] -> table_to_string tbl
+    | hd :: tl ->
+        let ntbl =
+          match hd with
+          | name, cmp, vl -> (
+              let ind = get_type_index 0 name (header tbl) in
+              match List.nth (header tbl) ind with
+              | Type (_, t) ->
+                  let e = process_entry vl t in
+                  List.filter
+                    (fun a ->
+                      match List.nth a ind with
+                      | None -> false
+                      | Some v -> run_constraint cmp e v)
+                    tbl
+              | _ -> failwith "Impossible")
+        in
+        process_constraints ntbl tl
 end
 
 module HashTable = struct
@@ -177,7 +207,11 @@ module HashTable = struct
     | Some x -> raise IndexExists
     | None ->
         let copy = Hashtbl.copy (hshtable table) in
-        let reordered = reorder_list entries (optionize (header table)) in
+        let reordered =
+          assert_types
+            (header table |> optionize)
+            (reorder_list entries (optionize (header table)))
+        in
         Hashtbl.add copy (deoptionize (List.hd reordered)) (List.tl reordered);
         HashTab (header table, copy)
 
@@ -193,6 +227,39 @@ module HashTable = struct
       (fun id ent acc -> acc ^ shorten (entry_to_string id) ^ build_row ent)
       (hshtable table)
       (build_row (optionize (header table)))
+
+  let rec process_constraints tbl lst =
+    let newHash = Hashtbl.create 0 in
+    match lst with
+    | [] -> table_to_string tbl
+    | hd :: tl ->
+        process_constraints
+          (match hd with
+          | name, cmp, vl ->
+              let ind = get_type_index 0 name (header tbl) in
+              let cmp_func =
+                match
+                  List.find
+                    (function
+                      | Type (n, t) -> n = name | _ -> failwith "Impossible")
+                    (header tbl)
+                with
+                | Type (n, t) -> (
+                    match process_entry vl t with e -> run_constraint cmp e)
+                | _ -> raise (Failure "Impossible")
+              in
+              Hashtbl.iter
+                (fun a b ->
+                  if ind = 0 then
+                    if cmp_func a then Hashtbl.add newHash a b else ()
+                  else
+                    match List.nth b (ind - 1) with
+                    | None -> ()
+                    | Some v ->
+                        if cmp_func v then Hashtbl.add newHash a b else ())
+                (hshtable tbl);
+              HashTab (header tbl, newHash))
+          tl
 
   let exists table name =
     let rec follow_header = function

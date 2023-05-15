@@ -12,6 +12,8 @@
   val read_input : string -> unit*)
 
 val main : unit -> unit
+(** [main ()] parses the user's input from the terminal using 
+    CliHandler and prints the resulting message to the terminal until the user quits *)
 
 module type CliHandler = sig
   val parse_input : string -> string
