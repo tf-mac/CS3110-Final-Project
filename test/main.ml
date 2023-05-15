@@ -12,6 +12,102 @@ let trim str =
 module TableTests (T : Table) = struct
   (*Table Tests*)
 
+  let make_test name act exp = name >:: fun _ -> assert_equal exp act
+  
+  let person =
+    T.empty
+      [
+        Type ("name", Strings);
+        Type ("loc", Strings);
+        Type ("age", Ints);
+        Type ("net", Floats);
+        Type ("alive", Bools);
+        Type ("char", Chars);
+        Type ("ids", Ids);
+      ]
+
+  let ttests =
+    [
+      make_test "No Strings insert"
+        (List.nth
+           ((T.insert_named person
+               [
+                 ("name", String "joe");
+                 ("age", Int 5);
+                 ("net", Float 5.);
+                 ("alive", Bool true);
+               ]
+            |> T.at)
+              (String "joe"))
+           1)
+        None;
+      make_test "No Int insert"
+        (List.nth
+           ((T.insert_named person
+               [
+                 ("name", String "joe");
+                 ("loc", String "DC");
+                 ("net", Float 5.);
+                 ("alive", Bool true);
+               ]
+            |> T.at)
+              (String "joe"))
+           2)
+        None;
+      make_test "No Floats insert"
+        (List.nth
+           ((T.insert_named person
+               [
+                 ("name", String "joe");
+                 ("loc", String "DC");
+                 ("age", Int 5);
+                 ("alive", Bool true);
+               ]
+            |> T.at)
+              (String "joe"))
+           3)
+        None;
+      make_test "No Bools insert"
+        (List.nth
+           ((T.insert_named person
+               [
+                 ("name", String "joe");
+                 ("loc", String "DC");
+                 ("age", Int 5);
+                 ("net", Float 5.);
+               ]
+            |> T.at)
+              (String "joe"))
+           4)
+        None;
+      make_test "No chars insert"
+        (List.nth
+           ((T.insert_named person
+               [
+                 ("name", String "joe");
+                 ("loc", String "DC");
+                 ("age", Int 5);
+                 ("net", Float 5.);
+               ]
+            |> T.at)
+              (String "joe"))
+           5)
+        None;
+      make_test "No ids insert"
+        (List.nth
+           ((T.insert_named person
+               [
+                 ("name", String "joe");
+                 ("loc", String "DC");
+                 ("age", Int 5);
+                 ("net", Float 5.);
+               ]
+            |> T.at)
+              (String "joe"))
+           6)
+        None;
+    ]
+
   let test_empty_table name ex expected =
     name >:: fun _ -> assert_equal expected (T.empty ex)
 
@@ -119,7 +215,7 @@ module TableTests (T : Table) = struct
         TypeMismatch;
       test_table_to_string "testing empty table to string" empty_table "";
       test_table_to_string "testing table to string" table "string name int age";
-    ]
+    ] @ ttests
 end
 
 module ListTableTests = TableTests (ListTable)
