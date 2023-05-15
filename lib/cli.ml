@@ -180,6 +180,7 @@ module CLI = struct
               (x |> Tbl.header |> optionize |> build_row)
               ^ "\n"
               ^ (String id |> Tbl.at x |> build_row)
+              ^ "\n|> "
             with Not_found -> get_response "err_at_id_DNE")
         | None ->
             get_response "err_at_invalid_type" (* "No type of that name" *))

@@ -4,9 +4,4 @@ How to Install
 
 2. cd to the correct file path
 
-3. Run "dune build" in terminal
-
-4. In Terminal run the command "_build/default/bin/main.exe". This will open up 
-the CLI in which you will interact with to create a table where you can define 
-custom types and assign them values. There are instructions in the CLI that will 
-help you to understand how to use our code.
+3. Run "make run" in the terminal
