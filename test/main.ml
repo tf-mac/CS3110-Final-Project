@@ -215,7 +215,6 @@ module TableTests (T : Table) = struct
     ]
 end
 
-module ListTableTests = TableTests (ListTable)
 module HashTableTests = TableTests (HashTable)
 
 module DatabaseTests (T : Table) = struct
@@ -367,7 +366,6 @@ module DatabaseTests (T : Table) = struct
     ]
 end
 
-module DatabaseListTable = DatabaseTests (ListTable)
 module DatabaseHashTable = DatabaseTests (HashTable)
 
 module type StringList = sig
@@ -779,12 +777,6 @@ let tests =
 let suite =
   "test suite"
   >::: List.flatten
-         [
-           ListTableTests.table_tests;
-           HashTableTests.table_tests;
-           DatabaseListTable.database_tests;
-           DatabaseHashTable.database_tests;
-           tests;
-         ]
+         [ HashTableTests.table_tests; DatabaseHashTable.database_tests; tests ]
 
 let _ = run_test_tt_main suite

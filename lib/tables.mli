@@ -31,5 +31,4 @@ module type Table = sig
   val exists : t -> string -> types
 end
 
-module ListTable : Table
 module HashTable : Table
