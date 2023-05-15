@@ -1,8 +1,5 @@
 open Utils
 
-exception IndexExists
-exception TypeMismatch
-
 module type Table = sig
   type t
 

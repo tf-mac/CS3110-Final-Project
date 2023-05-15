@@ -1,8 +1,5 @@
 open Utils
 
-exception IndexExists
-exception TypeMismatch
-
 let rec assert_types header a =
   match header with
   | [] -> if a = [] then [] else raise TypeMismatch [@coverage off]
