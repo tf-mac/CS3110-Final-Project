@@ -145,7 +145,8 @@ module HashTable = struct
   let rec deoptionize_list = function
     | [] -> []
     | Some x :: tl -> x :: deoptionize_list tl
-    | None :: tl -> raise (Failure "Deoptionize on none") [@coverage off]
+    | None :: tl -> raise (Failure "Deoptionize on none")
+    [@@coverage off]
 
   let header = function HashTab (hd, _) -> hd
   let hshtable = function HashTab (_, hsh) -> hsh
