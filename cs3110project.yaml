@@ -21,8 +21,10 @@ git-repo: "https://github.com/tf-mac/CS3110-Final-Project"
 demo-video-url: ""
 # Write a short, attention-grabbing description of your project.
 desc: >
-  Our project is a relational database. We structure information in a table.
-  We can define custom types with OCaml primitives, assign them to
-  values, and display those types to the user. The user can access all the
-  functionality through a command line interface that allows interaction
-  with the database.
+  Our project is a relational database. We structure information in a
+  hash table. We can define custom types with  OCaml primitives,
+  assign them to values, display those types to the user, and provide
+  references to other entries. The user can find values that match
+  certain expressions. The user can access all the functionality
+  through a command line interface that allows interaction with the
+  database.

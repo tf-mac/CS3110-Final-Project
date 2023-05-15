@@ -3,7 +3,6 @@ open Tables
 
 module Database (Table : Table) = struct
   exception NoEntry
-  exception WrongType
   exception TableExists
 
   type table = Table.t
@@ -31,8 +30,18 @@ module Database (Table : Table) = struct
   let get_table name database =
     match List.assoc_opt name database with Some x -> Some !x | None -> None
 
-  (*Currently doesn't work...*)
-  let get_reference ent database = raise (Failure "Unimplemented")
+  let get_reference ent database =
+    match ent with
+    | Id (tbl, id) -> (
+        let tbl =
+          match get_table tbl database with
+          | None -> raise Not_found
+          | Some v -> v
+        in
+        ( Table.header tbl,
+          match Table.at tbl id with exception Not_found -> None | v -> Some v
+        ))
+    | _ -> raise TypeMismatch
 
   let rec db_to_string database =
     match database with

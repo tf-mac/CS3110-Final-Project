@@ -1,11 +1,8 @@
 open Utils
 
-exception IndexExists
-exception TypeMismatch
-
 let rec assert_types header a =
   match header with
-  | [] -> if a = [] then [] else raise TypeMismatch
+  | [] -> if a = [] then [] else raise TypeMismatch [@coverage off]
   | hd :: tl -> (
       match a with
       | [] -> raise TypeMismatch
@@ -79,109 +76,21 @@ module type Table = sig
   val exists : t -> string -> types
 end
 
-module ListTable : Table = struct
-  type t = entry option list list
-
-  let rec optionize = function [] -> [] | hd :: tl -> Some hd :: optionize tl
-  let empty (ex : entry list) = [ optionize ex ]
-
-  let insert (table : t) a =
-    match
-      List.find (fun b ->
-          match a with
-          | [] -> raise (Failure "Error")
-          | hd :: tl -> (
-              match b with
-              | [] -> raise (Failure "Error")
-              | hdb :: tlb -> hd = hdb))
-    with
-    | exception Not_found ->
-        table @ [ assert_types (List.hd table) (optionize a) ]
-    | x -> raise IndexExists
-
-  let insert_named table elist =
-    let name, value = List.hd elist in
-    match List.find (fun a -> List.hd a = Some value) table with
-    | x -> raise IndexExists
-    | exception Not_found -> table @ [ reorder_list elist (List.hd table) ]
-
-  let at (table : t) id =
-    List.find
-      (fun a ->
-        match a with
-        | [] -> raise (Failure "This shouldn't happen")
-        | hd :: tl -> ( match hd with Some x -> x = id | None -> false))
-      table
-
-  let delete (table : t) id =
-    List.filter
-      (fun a ->
-        match a with
-        | [] -> false
-        | a :: asd -> ( match a with Some x -> x = id | None -> false))
-      table
-
-  let rec table_to_string (table : t) =
-    match table with
-    | [] -> ""
-    | b :: xs -> build_row b ^ table_to_string xs ^ "\n"
-
-  let rec deoptionize = function
-    | [] -> []
-    | hd :: tl ->
-        (match hd with
-        | Some x -> x
-        | None -> raise (Failure "Deoptionize saw None"))
-        :: deoptionize tl
-
-  let header = function
-    | [] -> raise (Failure "RI Violated for tables")
-    | hd :: tl -> deoptionize hd
-
-  let exists table name =
-    let rec follow_header = function
-      | [] -> raise TypeMismatch
-      | Type (n, t) :: tl when n = name -> t
-      | _ :: tl -> follow_header tl
-    in
-    follow_header (header table)
-
-  let rec process_constraints tbl lst =
-    match lst with
-    | [] -> table_to_string tbl
-    | hd :: tl ->
-        let ntbl =
-          match hd with
-          | name, cmp, vl -> (
-              let ind = get_type_index 0 name (header tbl) in
-              match List.nth (header tbl) ind with
-              | Type (_, t) ->
-                  let e = process_entry vl t in
-                  List.filter
-                    (fun a ->
-                      match List.nth a ind with
-                      | None -> false
-                      | Some v -> run_constraint cmp e v)
-                    tbl
-              | _ -> failwith "Impossible")
-        in
-        process_constraints ntbl tl
-end
-
 module HashTable = struct
   type t = HashTab of entry list * (entry, entry option list) Hashtbl.t
 
   let rec deoptionize_list = function
     | [] -> []
     | Some x :: tl -> x :: deoptionize_list tl
-    | None :: tl -> failwith "Deoptionize on None"
+    | None :: tl -> raise (Failure "Deoptionize on none")
+    [@@coverage off]
 
   let header = function HashTab (hd, _) -> hd
   let hshtable = function HashTab (_, hsh) -> hsh
 
   let deoptionize = function
     | Some x -> x
-    | None -> raise (Failure "Deoptionize on none")
+    | None -> raise (Failure "Deoptionize on none") [@coverage off]
 
   let rec optionize = function [] -> [] | hd :: tl -> Some hd :: optionize tl
   let empty (ex : entry list) = HashTab (ex, Hashtbl.create 0)
@@ -205,7 +114,11 @@ module HashTable = struct
     | Some x -> raise IndexExists
     | None ->
         let copy = Hashtbl.copy (hshtable table) in
-        let reordered = reorder_list entries (optionize (header table)) in
+        let reordered =
+          assert_types
+            (header table |> optionize)
+            (reorder_list entries (optionize (header table)))
+        in
         Hashtbl.add copy (deoptionize (List.hd reordered)) (List.tl reordered);
         HashTab (header table, copy)
 

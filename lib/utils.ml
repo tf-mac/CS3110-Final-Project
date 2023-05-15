@@ -13,16 +13,6 @@ type entry =
   | Id of (string * entry)
   | Type of (string * types)
 
-let name_map_entry t =
-  match t with
-  | String _ -> "string"
-  | Float _ -> "float"
-  | Int _ -> "int"
-  | Char _ -> "char"
-  | Bool _ -> "bool"
-  | Id _ -> "id"
-  | Type _ -> "type"
-
 let name_map_types t =
   match t with
   | Strings -> "string"
@@ -31,18 +21,6 @@ let name_map_types t =
   | Chars -> "char"
   | Bools -> "bool"
   | Ids -> "id"
-
-let guess_entry input =
-  match float_of_string_opt input with
-  | Some v -> Float v
-  | None -> (
-      match int_of_string_opt input with
-      | Some v -> Int v
-      | None -> (
-          match bool_of_string_opt input with
-          | Some v -> Bool v
-          | None ->
-              if String.length input = 1 then Char input.[0] else String input))
 
 let process_entry input = function
   | Strings -> String input
@@ -60,19 +38,40 @@ let process_entry input = function
       match bool_of_string_opt input with
       | None -> raise TypeMismatch
       | Some v -> Bool v)
-  | Ids -> (
-      match String.split_on_char '@' input with
-      | [] | [ _ ] | _ :: _ :: _ :: _ -> raise TypeMismatch
-      | [ hd; tl ] -> Id (hd, guess_entry tl))
+  | _ -> raise TypeMismatch
 
-let run_constraint cmp rhs lhs =
+let make_compare cmp lhs rhs =
   match cmp with
-  | LT -> (
+  | LT -> lhs < rhs
+  | LTE -> lhs <= rhs
+  | EQ -> lhs = rhs
+  | NEQ -> lhs <> rhs
+  | GT -> lhs > rhs
+  | GTE -> lhs >= rhs
+
+let run_constraint (cmp : comparison) rhs lhs =
+  match rhs with
+  | Float r -> (
       match lhs with
-      | Float lhs -> (
-          match rhs with Float rhs -> lhs < rhs | _ -> raise TypeMismatch)
-      | _ -> raise TypeMismatch)
-  | _ -> failwith "Unimplemented"
+      | Float l -> make_compare cmp l r
+      | _ -> failwith "Typing error")
+  | Int r -> (
+      match lhs with
+      | Int l -> make_compare cmp l r
+      | _ -> failwith "Typing error")
+  | Char r -> (
+      match lhs with
+      | Char l -> make_compare cmp l r
+      | _ -> failwith "Typing error")
+  | Bool r -> (
+      match lhs with
+      | Bool l -> make_compare cmp l r
+      | _ -> failwith "Typing error")
+  | String r -> (
+      match lhs with
+      | String l -> make_compare cmp l r
+      | _ -> failwith "Typing error")
+  | _ -> raise TypeMismatch
 
 let rec entry_to_string ent =
   match ent with
