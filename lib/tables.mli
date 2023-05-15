@@ -18,8 +18,14 @@ module type Table = sig
      Raises [IndexExists] if the index provided is already in the table.
      Raises [TypeMismatch] if the new row fits the type definition*)
   val insert_named : t -> (string * entry) list -> t
+
+  (* [at t id] returns a list of entry options representing all entries [id] in the [t]*)
   val at : t -> entry -> entry option list
+
+  (* [delete t id] removes the entire row in [t] containing [id]. It returns the updated table.*)
   val delete : t -> entry -> t
+
+  (* [table_to_string t]  returns a string representation of [t]*)
   val table_to_string : t -> string
 
   (* Processes a given list of constraints
