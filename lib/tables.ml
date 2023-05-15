@@ -103,7 +103,9 @@ module ListTable : Table = struct
     let name, value = List.hd elist in
     match List.find (fun a -> List.hd a = Some value) table with
     | x -> raise IndexExists
-    | exception Not_found -> table @ [ reorder_list elist (List.hd table) ]
+    | exception Not_found ->
+        table
+        @ [ assert_types (List.hd table) (reorder_list elist (List.hd table)) ]
 
   let at (table : t) id =
     List.find
@@ -205,7 +207,11 @@ module HashTable = struct
     | Some x -> raise IndexExists
     | None ->
         let copy = Hashtbl.copy (hshtable table) in
-        let reordered = reorder_list entries (optionize (header table)) in
+        let reordered =
+          assert_types
+            (header table |> optionize)
+            (reorder_list entries (optionize (header table)))
+        in
         Hashtbl.add copy (deoptionize (List.hd reordered)) (List.tl reordered);
         HashTab (header table, copy)
 
