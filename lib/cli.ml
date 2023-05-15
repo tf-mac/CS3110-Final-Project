@@ -165,8 +165,9 @@ module CLI = struct
             current_state := BuildType (name, id, []);
             get_response "indent" (* "|    " *))
 
-  let process_at = function
-    | [] | [ "" ] ->
+  let process_at input =
+    match input |> List.map String.trim |> List.filter (fun s -> s <> "") with
+    | [] ->
         get_response "err_at_empty"
         (* "Please enter what the type and id of which to get an instance\n|> " *)
     | [ name ] ->
@@ -174,42 +175,48 @@ module CLI = struct
         (* "Please enter an id of the instance you which to get\n|> " *)
     | [ name; id ] -> (
         match DB.get_table name !db with
-        | Some x ->
-            (x |> Tbl.header |> optionize |> build_row)
-            ^ "\n"
-            ^ (String id |> Tbl.at x |> build_row)
+        | Some x -> (
+            try
+              (x |> Tbl.header |> optionize |> build_row)
+              ^ "\n"
+              ^ (String id |> Tbl.at x |> build_row)
+            with Not_found -> get_response "err_at_id_DNE")
         | None ->
             get_response "err_at_invalid_type" (* "No type of that name" *))
     | name :: id :: col :: tl -> (
         match DB.get_table name !db with
         | Some x -> (
-            let row = Tbl.at x (String id) in
-            match int_of_string_opt col with
-            | None ->
-                get_response "err_at_column_not_int"
-                (* "Column number should be an int" *)
-            | Some i -> (
-                match List.nth_opt row i with
-                | Some e -> (
-                    match e with
-                    | None -> get_response "no_entry"
-                    | Some e -> (
-                        match e with
-                        | Id (name, row) -> (
-                            entry_to_string e ^ "="
-                            ^
-                            match DB.get_reference e !db with
-                            | exception Not_found -> get_response "unbound_type"
-                            | l, r -> (
-                                "\n"
-                                ^ build_row (optionize l)
-                                ^
-                                match r with
-                                | None -> get_response "unbound_val"
-                                | Some v -> build_row v))
-                        | _ -> entry_to_string e))
-                | None -> get_response "err_at_column_out_of_range"))
-        | None -> get_response "err_at_type_DNE")
+            try
+              let row = Tbl.at x (String id) in
+              match int_of_string_opt col with
+              | None ->
+                  get_response "err_at_column_not_int"
+                  (* "Column number should be an int" *)
+              | Some i -> (
+                  match List.nth_opt row i with
+                  | Some e -> (
+                      match e with
+                      | None -> get_response "no_entry"
+                      | Some e -> (
+                          match e with
+                          | Id (name, row) ->
+                              (entry_to_string e ^ "="
+                              ^
+                              match DB.get_reference e !db with
+                              | exception Not_found ->
+                                  get_response "unbound_type"
+                              | l, r -> (
+                                  "\n"
+                                  ^ build_row (optionize l)
+                                  ^
+                                  match r with
+                                  | None -> get_response "unbound_val"
+                                  | Some v -> build_row v))
+                              ^ "\n|> "
+                          | _ -> entry_to_string e ^ "\n|> "))
+                  | None -> get_response "err_at_column_out_of_range")
+            with Not_found -> get_response "err_at_id_DNE")
+        | None -> get_response "err_at_invalid_type")
 
   let split_on_substring sub str =
     let idxs = ref [ 0 ] in
@@ -276,12 +283,12 @@ module CLI = struct
     | BuildType v -> build_type v input
     | Default -> (
         match String.split_on_char ' ' input with
-        | "quit" :: tl -> exit 0
+        | "quit" :: tl -> exit 0 [@coverage off]
         | "help" :: tl -> get_response "help_message"
         | "def" :: tl -> process_type tl
         | "assign" :: tl -> process_assign tl
-        | "print" :: tl -> DB.db_to_string !db ^ "\n|> "
-        | "at" :: tl -> process_at tl ^ "\n|> "
+        | "print" :: tl -> DB.db_to_string !db ^ "|> "
+        | "at" :: tl -> process_at tl
         | "find" :: tl -> process_find tl
         | _ ->
             get_response "err_unknown_command"
@@ -302,3 +309,4 @@ let main () =
   while true do
     read_line () |> CLI.parse_input |> print_string
   done
+  [@@coverage off]

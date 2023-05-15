@@ -123,7 +123,14 @@ let malformed_assign_states =
     ] )
 
 let pre_defn_assign_tests =
-  ( [ "def Person Name"; "int age"; "float bank"; ""; "assign Person John" ],
+  ( [
+      "def Person Name";
+      "int age";
+      "float bank";
+      "id friend";
+      "";
+      "assign Person John";
+    ],
     [
       ( true,
         "can define types out of order bank",
@@ -139,6 +146,26 @@ let pre_defn_assign_tests =
         get_response "err_create_field_already_entered" );
       ( false,
         "can define types out of order empty end",
+        "",
+        get_response "indent_end" );
+      ( false,
+        "testing the id system doesnt throw errors 1",
+        "assign Person Jim",
+        get_response "indent" );
+      ( false,
+        "testing the id system throws error when no @",
+        "friend = Person",
+        get_response "err_create_field_wrong_type" );
+      ( false,
+        "testing the id system on multiple @",
+        "friend = Person @ John @ Jim",
+        get_response "err_create_field_wrong_type" );
+      ( false,
+        "testing the id system doesnt throw errors 2",
+        "friend = Person @ John",
+        get_response "indent" );
+      ( false,
+        "testing the id system doesnt throw errors 3",
         "",
         get_response "indent_end" );
       ( true,
@@ -226,7 +253,7 @@ let find_errors_tests =
     ] )
 
 let find_tests =
-  ( fully_defined_generic @ fully_assigned_generic
+  ( fully_assigned_generic
     @ [
         "assign Type ID2";
         "i = 1";
@@ -263,6 +290,84 @@ let find_tests =
          true hello there" );
     ] )
 
+let at_tests =
+  ( fully_assigned_generic,
+    [
+      (true, "test empty at statement ", "at ", get_response "err_at_empty");
+      (true, "test at with no id", "at Type", get_response "err_at_no_id");
+      ( true,
+        "test at statement with invalid id ",
+        "at Type ID",
+        get_response "err_at_id_DNE" );
+      ( true,
+        "test at statement with incorrect type name",
+        "at Tupe ID",
+        get_response "err_at_invalid_type" );
+      ( true,
+        "test at statement with non int column number",
+        "at Type ID1 i",
+        get_response "err_at_column_not_int" );
+      ( true,
+        "test at statement with out of range column number",
+        "at Type ID1 10",
+        get_response "err_at_column_out_of_range" );
+      ( true,
+        "test at statement on no entry column",
+        "at Type ID1 6",
+        get_response "no_entry" );
+      ( true,
+        "test at statement on column with int value 10 ",
+        "at Type ID1 1",
+        "10\n|> " );
+      ( true,
+        "test empty at statement ",
+        "at Type ID 1",
+        get_response "err_at_id_DNE" );
+      ( true,
+        "test empty at statement ",
+        "at Tye ID 1",
+        get_response "err_at_invalid_type" );
+      ( true,
+        "test empty at statement ",
+        "assign Type ID2",
+        get_response "indent" );
+      ( false,
+        "test empty at statement ",
+        "d = Type @ asdf",
+        get_response "indent" );
+      (false, "test empty at statement ", "", get_response "indent_end");
+      ( false,
+        "test empty at statement ",
+        "at Type ID2 6",
+        "Type@asdf=\n\
+         string ID\tint i\t\tfloat f\t\tchar c\t\tbool b\t\tstring s\tid d\t\t\n\n\
+         <unbound val>\n\
+         |> \n\
+         |> " );
+    ] )
+
+let print_tests =
+  ( fully_assigned_generic,
+    [
+      ( true,
+        "test print on fully defined generic",
+        "print",
+        "Table: Type\n\n\
+         string ID int i float f char c bool b string s id d ID1 10 3.14 a \
+         true hello there |>" );
+    ] )
+
+let at_id_tests =
+  ( fully_assigned_generic @ [ "assign Type ID2"; "d = Type @ ID1"; "" ],
+    [
+      ( true,
+        "at tests on id instance",
+        "at Type ID2 6",
+        "Type@ID1=\n\
+         string ID int i float f char c bool b string s id d ID1 10 3.14 a \
+         true hello there |>" );
+    ] )
+
 let misc_tests =
   ( [],
     [
@@ -283,11 +388,11 @@ let rec gather_tests_no_print tests =
   | (primer, tests) :: t ->
       make_test primer tests false @ gather_tests_no_print t
 
-let gather_tests_with_print tests =
+let rec gather_tests_with_print tests =
   match tests with
   | [] -> []
   | (primer, tests) :: t ->
-      make_test primer tests true @ gather_tests_no_print t
+      make_test primer tests true @ gather_tests_with_print t
 
 let tests =
   ([
@@ -297,9 +402,10 @@ let tests =
      find_errors_tests;
      assign_type_tests;
      malformed_assign_states;
+     at_tests;
    ]
   |> gather_tests_no_print)
-  @ ([ find_tests ] |> gather_tests_with_print)
+  @ ([ find_tests; print_tests; at_id_tests ] |> gather_tests_with_print)
 
 let suite = "search test suite" >::: tests
 let _ = run_test_tt_main suite
