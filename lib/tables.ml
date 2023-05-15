@@ -5,7 +5,7 @@ exception TypeMismatch
 
 let rec assert_types header a =
   match header with
-  | [] -> if a = [] then [] else raise TypeMismatch
+  | [] -> if a = [] then [] else raise TypeMismatch [@coverage off]
   | hd :: tl -> (
       match a with
       | [] -> raise TypeMismatch
@@ -80,13 +80,12 @@ module ListTable : Table = struct
 
   let insert (table : t) a =
     match
-      List.find (fun b ->
-          match a with
-          | [] -> raise (Failure "Error")
-          | hd :: tl -> (
-              match b with
-              | [] -> raise (Failure "Error")
-              | hdb :: tlb -> hd = hdb))
+      List.find
+        (fun b ->
+          match optionize a with
+          | [] -> false
+          | hd :: tl -> ( match b with [] -> false | hdb :: tlb -> hd = hdb))
+        table
     with
     | exception Not_found ->
         table @ [ assert_types (List.hd table) (optionize a) ]
@@ -106,12 +105,12 @@ module ListTable : Table = struct
         | hd :: tl -> ( match hd with Some x -> x = id | None -> false))
       table
 
-  let delete (table : t) id =
+  let delete (table : t) id : t =
     List.filter
       (fun a ->
         match a with
-        | [] -> false
-        | a :: asd -> ( match a with Some x -> x = id | None -> false))
+        | [] -> true
+        | a :: asd -> ( match a with Some x -> x <> id | None -> true))
       table
 
   let rec table_to_string (table : t) =
@@ -124,11 +123,11 @@ module ListTable : Table = struct
     | hd :: tl ->
         (match hd with
         | Some x -> x
-        | None -> raise (Failure "Deoptionize saw None"))
+        | None -> raise (Failure "Deoptionize saw None") [@coverage off])
         :: deoptionize tl
 
   let header = function
-    | [] -> raise (Failure "RI Violated for tables")
+    | [] -> raise (Failure "RI Violated for tables") [@coverage off]
     | hd :: tl -> deoptionize hd
 
   let exists table name =
@@ -146,14 +145,14 @@ module HashTable = struct
   let rec deoptionize_list = function
     | [] -> []
     | Some x :: tl -> x :: deoptionize_list tl
-    | None :: tl -> failwith "Deoptionize on None"
+    | None :: tl -> raise (Failure "Deoptionize on none") [@coverage off]
 
   let header = function HashTab (hd, _) -> hd
   let hshtable = function HashTab (_, hsh) -> hsh
 
   let deoptionize = function
     | Some x -> x
-    | None -> raise (Failure "Deoptionize on none")
+    | None -> raise (Failure "Deoptionize on none") [@coverage off]
 
   let rec optionize = function [] -> [] | hd :: tl -> Some hd :: optionize tl
   let empty (ex : entry list) = HashTab (ex, Hashtbl.create 0)
