@@ -199,17 +199,17 @@ module Database (Table : Table) = struct
     | <span data-count="0">_</span> -&gt; raise TableExists
 
   let build_table database table name =
-    <span data-count="110">m</span>atch
+    <span data-count="145">m</span>atch
       List.find (fun a -&gt; <span data-count="0">m</span>atch a with <span data-count="0">t</span>name, t -&gt; name = tname) database
     with
-    | <span data-count="110">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="110">y</span> table)) :: database
+    | <span data-count="145">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="145">y</span> table)) :: database
     | <span data-count="0">_</span> -&gt; raise TableExists
 
   let drop_table name database =
     <span data-count="0">L</span>ist.filter (fun a -&gt; <span data-count="0">m</span>atch a with <span data-count="0">t</span>name, t -&gt; name &lt;&gt; tname) database
 
   let get_table name database =
-    <span data-count="240">m</span>atch List.assoc_opt name database with <span data-count="120">S</span>ome x -&gt; Some !x | <span data-count="120">N</span>one -&gt; None
+    <span data-count="395">m</span>atch List.assoc_opt name database with <span data-count="240">S</span>ome x -&gt; Some !x | <span data-count="155">N</span>one -&gt; None
 
   (*Currently doesn't work...*)
   let get_reference ent database =
@@ -238,9 +238,9 @@ module Database (Table : Table) = struct
     | <span data-count="0">_</span> :: tl -&gt; add_entry table_name new_row tl
 
   let add_named_entry table_name new_row database =
-    <span data-count="45">m</span>atch List.assoc_opt table_name database with
+    <span data-count="105">m</span>atch List.assoc_opt table_name database with
     | <span data-count="0">N</span>one -&gt; raise Not_found
-    | <span data-count="45">S</span>ome x -&gt; x := Table.insert_name<span data-count="45">d</span> !x new_row
+    | <span data-count="105">S</span>ome x -&gt; x := Table.insert_name<span data-count="105">d</span> !x new_row
 end
 </code></pre>
       </div>

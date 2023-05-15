@@ -10,7 +10,9 @@ let get_response = CLI.get_response
 
 let handle_table_prints str =
   str |> String.split_on_char '\t' |> List.map String.trim
+  |> List.filter (fun a -> a <> "")
   |> List.fold_left (fun s1 s2 -> s1 ^ " " ^ s2) ""
+  |> String.trim
 
 let rec add_input lst =
   match lst with
@@ -178,7 +180,7 @@ let assign_type_tests =
         get_response "err_create_field_wrong_type" );
     ] )
 
-let find_tests =
+let find_errors_tests =
   ( fully_assigned_generic,
     [
       ( true,
@@ -213,6 +215,52 @@ let find_tests =
         "empty expr with and",
         "find Type  and   ",
         get_response "err_find_invalid_expr" );
+      ( true,
+        "find Type with wrong type in expr",
+        "find Type i <= 3.2",
+        get_response "err_find_wrong_type" );
+      ( true,
+        "find Type with wrong type in expr",
+        "find Type k <= 3.2",
+        get_response "err_find_var_DNE" );
+    ] )
+
+let find_tests =
+  ( fully_defined_generic @ fully_assigned_generic
+    @ [
+        "assign Type ID2";
+        "i = 1";
+        "f = 2.71";
+        "c = b";
+        "b = false";
+        "s = good bye";
+        "";
+      ],
+    [
+      ( true,
+        "test find for no values with and",
+        "find Type i = 1 and b = true",
+        "string ID int i float f char c bool b string s id d" );
+      ( true,
+        "test find for one value with and",
+        "find Type i = 1 and b = false",
+        "string ID int i float f char c bool b string s id d ID2 1 2.71 b \
+         false good bye" );
+      ( true,
+        "test find for two value with no and",
+        "find Type i <> 5",
+        "string ID int i float f char c bool b string s id d ID1 10 3.14 a \
+         true hello there ID2 1 2.71 b false good bye" );
+      ( true,
+        "test find for one value with no and",
+        "find Type i <= 1",
+        "string ID int i float f char c bool b string s id d ID2 1 2.71 b \
+         false good bye" );
+      ( true,
+        "test find for one value with no and",
+        "find Type f >= 3",
+        "string ID int i float f char c bool b string s id d ID1 10 3.14 a \
+         true hello there" );
     ] )
 
 let misc_tests =
@@ -222,6 +270,10 @@ let misc_tests =
       ( true,
         "unknown command error on random input",
         "asdf",
+        get_response "err_unknown_command" );
+      ( true,
+        "unknown command error on typo input",
+        "fi nd",
         get_response "err_unknown_command" );
     ] )
 
@@ -242,12 +294,12 @@ let tests =
      def_tests;
      misc_tests;
      pre_defn_assign_tests;
-     find_tests;
+     find_errors_tests;
      assign_type_tests;
      malformed_assign_states;
    ]
   |> gather_tests_no_print)
-  @ ([] |> gather_tests_with_print)
+  @ ([ find_tests ] |> gather_tests_with_print)
 
 let suite = "search test suite" >::: tests
 let _ = run_test_tt_main suite

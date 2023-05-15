@@ -265,7 +265,9 @@ module CLI = struct
             |> Tbl.process_constraints type_table
           with
           | InvalidExpr -> get_response "err_find_invalid_expr"
-          | InvalidComparison -> get_response "err_find_invalid_comparison")
+          | InvalidComparison -> get_response "err_find_invalid_comparison"
+          | TypeMismatch -> get_response "err_find_wrong_type"
+          | Not_found -> get_response "err_find_var_DNE")
 
   (** [parse_input input] takes in new input and determines the relevant command*)
   let parse_input input =

@@ -25,6 +25,8 @@
     "err_find_invalid_expr": "Invalid comparison expression\n|> ",
     "err_find_invalid_comparison": "Invalid comparison, use <> = > < >= <=\n|> ",
     "err_find_invalid_type": "Cannot find type of that name\n|> ",
+    "err_find_wrong_type": "Wrong type in find expression\n|> ",
+    "err_find_var_DNE": "A variable in the expression does not exist\n|> ",
     "help_message": "\nTo define a custom dataframe, type the following,\nall valueNames must be unique:\ndef TypeName IdName\n   type valueName\n   ...\n   type valueName\n\n\nTo assign values to the custom types:\nassign TypeName IdValue\n   valueName = value\n   ...\n   valueName = value\n\nTo save to a file, use 'save <file>'\n\nTo find a file, type 'find TypeName expr'\n'expr' must be of the form: 'variable compare value' separated by spaces.\nValid compare opperators include <> = > < <= and >=\nexpr can be chained using 'and'\n\n|> ",
     "indent_end": "|    <|\n|> ",
     "indent": "|    ",
