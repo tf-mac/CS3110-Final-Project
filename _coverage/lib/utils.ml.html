@@ -257,58 +257,58 @@ type entry =
   | Type of (string * types)
 
 let name_map_types t =
-  <span data-count="204">m</span>atch t with
-  | <span data-count="58">S</span>trings -&gt; "string"
-  | <span data-count="29">F</span>loats -&gt; "float"
-  | <span data-count="30">I</span>nts -&gt; "int"
-  | <span data-count="29">C</span>hars -&gt; "char"
-  | <span data-count="29">B</span>ools -&gt; "bool"
-  | <span data-count="29">I</span>ds -&gt; "id"
+  <span data-count="330">m</span>atch t with
+  | <span data-count="94">S</span>trings -&gt; "string"
+  | <span data-count="47">F</span>loats -&gt; "float"
+  | <span data-count="48">I</span>nts -&gt; "int"
+  | <span data-count="47">C</span>hars -&gt; "char"
+  | <span data-count="47">B</span>ools -&gt; "bool"
+  | <span data-count="47">I</span>ds -&gt; "id"
 
 let process_entry input = function
   | <span data-count="0">S</span>trings -&gt; String input
-  | <span data-count="3">F</span>loats -&gt; (
+  | <span data-count="5">F</span>loats -&gt; (
       match float_of_string_opt input with
       | <span data-count="0">N</span>one -&gt; raise TypeMismatch
-      | <span data-count="3">S</span>ome v -&gt; Float v)
-  | <span data-count="15">I</span>nts -&gt; (
+      | <span data-count="5">S</span>ome v -&gt; Float v)
+  | <span data-count="25">I</span>nts -&gt; (
       match int_of_string_opt input with
-      | <span data-count="3">N</span>one -&gt; raise TypeMismatch
-      | <span data-count="12">S</span>ome v -&gt; Int v)
+      | <span data-count="5">N</span>one -&gt; raise TypeMismatch
+      | <span data-count="20">S</span>ome v -&gt; Int v)
   | <span data-count="0">C</span>hars -&gt;
       if String.lengt<span data-count="0">h</span> input = 1 then <span data-count="0">C</span>har input.[0] else <span data-count="0">r</span>aise TypeMismatch
-  | <span data-count="6">B</span>ools -&gt; (
+  | <span data-count="10">B</span>ools -&gt; (
       match bool_of_string_opt input with
       | <span data-count="0">N</span>one -&gt; raise TypeMismatch
-      | <span data-count="6">S</span>ome v -&gt; Bool v)
+      | <span data-count="10">S</span>ome v -&gt; Bool v)
   | <span data-count="0">_</span> -&gt; raise TypeMismatch
 
 let make_compare cmp lhs rhs =
-  <span data-count="36">m</span>atch cmp with
+  <span data-count="60">m</span>atch cmp with
   | <span data-count="0">L</span>T -&gt; lhs &lt; rhs
-  | <span data-count="6">L</span>TE -&gt; lhs &lt;= rhs
-  | <span data-count="18">E</span>Q -&gt; lhs = rhs
-  | <span data-count="6">N</span>EQ -&gt; lhs &lt;&gt; rhs
+  | <span data-count="10">L</span>TE -&gt; lhs &lt;= rhs
+  | <span data-count="30">E</span>Q -&gt; lhs = rhs
+  | <span data-count="10">N</span>EQ -&gt; lhs &lt;&gt; rhs
   | <span data-count="0">G</span>T -&gt; lhs &gt; rhs
-  | <span data-count="6">G</span>TE -&gt; lhs &gt;= rhs
+  | <span data-count="10">G</span>TE -&gt; lhs &gt;= rhs
 
 let run_constraint (cmp : comparison) rhs lhs =
-  <span data-count="36">m</span>atch rhs with
-  | <span data-count="6">F</span>loat r -&gt; (
+  <span data-count="60">m</span>atch rhs with
+  | <span data-count="10">F</span>loat r -&gt; (
       match lhs with
-      | <span data-count="6">F</span>loat l -&gt; make_compare cmp l r
+      | <span data-count="10">F</span>loat l -&gt; make_compare cmp l r
       | <span data-count="0">_</span> -&gt; failwith "Typing error")
-  | <span data-count="24">I</span>nt r -&gt; (
+  | <span data-count="40">I</span>nt r -&gt; (
       match lhs with
-      | <span data-count="24">I</span>nt l -&gt; make_compare cmp l r
+      | <span data-count="40">I</span>nt l -&gt; make_compare cmp l r
       | <span data-count="0">_</span> -&gt; failwith "Typing error")
   | <span data-count="0">C</span>har r -&gt; (
       match lhs with
       | <span data-count="0">C</span>har l -&gt; make_compare cmp l r
       | <span data-count="0">_</span> -&gt; failwith "Typing error")
-  | <span data-count="6">B</span>ool r -&gt; (
+  | <span data-count="10">B</span>ool r -&gt; (
       match lhs with
-      | <span data-count="6">B</span>ool l -&gt; make_compare cmp l r
+      | <span data-count="10">B</span>ool l -&gt; make_compare cmp l r
       | <span data-count="0">_</span> -&gt; failwith "Typing error")
   | <span data-count="0">S</span>tring r -&gt; (
       match lhs with
@@ -317,28 +317,28 @@ let run_constraint (cmp : comparison) rhs lhs =
   | <span data-count="0">_</span> -&gt; raise TypeMismatch
 
 let rec entry_to_string ent =
-  <span data-count="377">m</span>atch ent with
-  | <span data-count="58">S</span>tring x -&gt; x
-  | <span data-count="26">F</span>loat x -&gt; string_of_float x
-  | <span data-count="29">I</span>nt x -&gt; string_of_int x
-  | <span data-count="26">C</span>har x -&gt; String.make 1 x
-  | <span data-count="26">B</span>ool x -&gt; string_of_bool x
-  | <span data-count="8">I</span>d (a, b) -&gt; a ^ "@" ^ entry_to_strin<span data-count="8">g</span> b
-  | <span data-count="204">T</span>ype (a, b) -&gt; name_map_type<span data-count="204">s</span> b ^ " " ^ a
+  <span data-count="609">m</span>atch ent with
+  | <span data-count="94">S</span>tring x -&gt; x
+  | <span data-count="42">F</span>loat x -&gt; string_of_float x
+  | <span data-count="47">I</span>nt x -&gt; string_of_int x
+  | <span data-count="42">C</span>har x -&gt; String.make 1 x
+  | <span data-count="42">B</span>ool x -&gt; string_of_bool x
+  | <span data-count="12">I</span>d (a, b) -&gt; a ^ "@" ^ entry_to_strin<span data-count="12">g</span> b
+  | <span data-count="330">T</span>ype (a, b) -&gt; name_map_type<span data-count="330">s</span> b ^ " " ^ a
 
 let shorten inp =
-  <span data-count="360">l</span>et str = String.trim inp in
-  <span data-count="360">i</span>f String.lengt<span data-count="360">h</span> str &lt; 8 then <span data-count="268">s</span>tr ^ "\t\t"
-  else <span data-count="92">i</span>f String.lengt<span data-count="92">h</span> str &lt; 16 then <span data-count="90">s</span>tr ^ "\t"
+  <span data-count="582">l</span>et str = String.trim inp in
+  <span data-count="582">i</span>f String.lengt<span data-count="582">h</span> str &lt; 8 then <span data-count="438">s</span>tr ^ "\t\t"
+  else <span data-count="144">i</span>f String.lengt<span data-count="144">h</span> str &lt; 16 then <span data-count="142">s</span>tr ^ "\t"
   else <span data-count="2">S</span>tring.sub str 0 16
 
 let rec build_row entlist =
-  <span data-count="422">m</span>atch entlist with
-  | <span data-count="58">[</span>] -&gt; "\n\n"
-  | <span data-count="340">S</span>ome x :: xs -&gt; shorte<span data-count="340">n</span> (entry_to_strin<span data-count="340">g</span> x) ^ build_ro<span data-count="340">w</span> xs
-  | <span data-count="24">N</span>one :: xs -&gt; "\t\t" ^ build_ro<span data-count="24">w</span> xs
+  <span data-count="682">m</span>atch entlist with
+  | <span data-count="92">[</span>] -&gt; "\n\n"
+  | <span data-count="550">S</span>ome x :: xs -&gt; shorte<span data-count="550">n</span> (entry_to_strin<span data-count="550">g</span> x) ^ build_ro<span data-count="550">w</span> xs
+  | <span data-count="40">N</span>one :: xs -&gt; "\t\t" ^ build_ro<span data-count="40">w</span> xs
 
-let rec optionize = function <span data-count="9">[</span>] -&gt; [] | <span data-count="63">h</span>d :: tl -&gt; Some hd :: optioniz<span data-count="63">e</span> tl
+let rec optionize = function <span data-count="15">[</span>] -&gt; [] | <span data-count="105">h</span>d :: tl -&gt; Some hd :: optioniz<span data-count="105">e</span> tl
 </code></pre>
       </div>
     </div>

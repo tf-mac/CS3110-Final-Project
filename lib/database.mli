@@ -5,11 +5,14 @@ module Database (Table : Table) : sig
   exception NoEntry
   (** Raised when an entry that does not exist is parsed. *)
 
-  exception WrongType
   exception TableExists
+  (** Raised when a table is attempted to be added which already exists*)
 
   type table = Table.t
+  (** Internal table of the database*)
+
   type database
+  (** Internal database representation*)
 
   val empty : database
   (** [empty] is a table containing no elements*)

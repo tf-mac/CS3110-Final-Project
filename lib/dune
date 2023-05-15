@@ -1,5 +1,6 @@
 (library
  (name RelationalDatabase)
  (libraries yojson)
+ (public_name Database)
  (instrumentation
   (backend bisect_ppx)))

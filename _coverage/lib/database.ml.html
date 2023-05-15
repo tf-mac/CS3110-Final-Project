@@ -18,7 +18,7 @@
       <h2>97.50%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:28.57%"></span>
+      <span class="unvisited" style="bottom:29.03%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -36,56 +36,55 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span class="visited"> </span>
-<a id="L36"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
-<a id="L38"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
 <a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span class="unvisited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="unvisited"> </span>
+<a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
-<a id="L53"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span class="visited"> </span>
 <a id="L61"></a><span class="visited"> </span>
-<a id="L62"></a><span class="visited"> </span>
-<a id="L63"></a><span > </span>
+<a id="L62"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -152,14 +151,12 @@
 <a href="#L60">60</a>
 <a href="#L61">61</a>
 <a href="#L62">62</a>
-<a href="#L63">63</a>
 </pre>
 <pre><code class="ocaml">open Utils
 open Tables
 
 module Database (Table : Table) = struct
   exception NoEntry
-  exception WrongType
   exception TableExists
 
   type table = Table.t
@@ -168,43 +165,43 @@ module Database (Table : Table) = struct
   let empty = []
 
   let add_table database table name : database =
-    <span data-count="18">m</span>atch
-      List.find (fun a -&gt; <span data-count="5">m</span>atch a with <span data-count="5">t</span>name, t -&gt; name = tname) database
+    <span data-count="28">m</span>atch
+      List.find (fun a -&gt; <span data-count="7">m</span>atch a with <span data-count="7">t</span>name, t -&gt; name = tname) database
     with
-    | <span data-count="17">e</span>xception Not_found -&gt; (name, ref table) :: database
+    | <span data-count="27">e</span>xception Not_found -&gt; (name, ref table) :: database
     | <span data-count="1">_</span> -&gt; raise TableExists
 
   let build_table database table name =
-    <span data-count="132">m</span>atch
+    <span data-count="218">m</span>atch
       List.find (fun a -&gt; <span data-count="2">m</span>atch a with <span data-count="2">t</span>name, t -&gt; name = tname) database
     with
-    | <span data-count="131">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="131">y</span> table)) :: database
+    | <span data-count="217">e</span>xception Not_found -&gt; (name, ref (Table.empt<span data-count="217">y</span> table)) :: database
     | <span data-count="1">_</span> -&gt; raise TableExists
 
   let drop_table name database =
     <span data-count="4">L</span>ist.filter (fun a -&gt; <span data-count="4">m</span>atch a with <span data-count="4">t</span>name, t -&gt; name &lt;&gt; tname) database
 
   let get_table name database =
-    <span data-count="361">m</span>atch List.assoc_opt name database with <span data-count="217">S</span>ome x -&gt; Some !x | <span data-count="144">N</span>one -&gt; None
+    <span data-count="597">m</span>atch List.assoc_opt name database with <span data-count="359">S</span>ome x -&gt; Some !x | <span data-count="238">N</span>one -&gt; None
 
   let get_reference ent database =
-    <span data-count="9">m</span>atch ent with
-    | <span data-count="9">I</span>d (tbl, id) -&gt; (
+    <span data-count="13">m</span>atch ent with
+    | <span data-count="13">I</span>d (tbl, id) -&gt; (
         let tbl =
           match get_table tbl database with
           | <span data-count="1">N</span>one -&gt; raise Not_found
-          | <span data-count="8">S</span>ome v -&gt; v
+          | <span data-count="12">S</span>ome v -&gt; v
         in
-        ( Table.heade<span data-count="8">r</span> tbl,
-          match Table.at tbl id with <span data-count="4">e</span>xception Not_found -&gt; None | <span data-count="4">v</span> -&gt; Some v
+        ( Table.heade<span data-count="12">r</span> tbl,
+          match Table.at tbl id with <span data-count="6">e</span>xception Not_found -&gt; None | <span data-count="6">v</span> -&gt; Some v
         ))
     | <span data-count="0">_</span> -&gt; raise TypeMismatch
 
   let rec db_to_string database =
-    <span data-count="9">m</span>atch database with
-    | <span data-count="5">[</span>] -&gt; "\n"
-    | <span data-count="4">(</span>name, x) :: xs -&gt;
-        "Table: " ^ name ^ "\n\n" ^ Table.table_to_strin<span data-count="4">g</span> !x ^ db_to_strin<span data-count="4">g</span> xs
+    <span data-count="13">m</span>atch database with
+    | <span data-count="7">[</span>] -&gt; "\n"
+    | <span data-count="6">(</span>name, x) :: xs -&gt;
+        "Table: " ^ name ^ "\n\n" ^ Table.table_to_strin<span data-count="6">g</span> !x ^ db_to_strin<span data-count="6">g</span> xs
 
   let rec add_entry table_name new_row database =
     <span data-count="3">m</span>atch database with
@@ -213,9 +210,9 @@ module Database (Table : Table) = struct
     | <span data-count="1">_</span> :: tl -&gt; add_entry table_name new_row tl
 
   let add_named_entry table_name new_row database =
-    <span data-count="116">m</span>atch List.assoc_opt table_name database with
+    <span data-count="192">m</span>atch List.assoc_opt table_name database with
     | <span data-count="1">N</span>one -&gt; raise Not_found
-    | <span data-count="115">S</span>ome x -&gt; x := Table.insert_name<span data-count="115">d</span> !x new_row
+    | <span data-count="191">S</span>ome x -&gt; x := Table.insert_name<span data-count="191">d</span> !x new_row
 end
 </code></pre>
       </div>

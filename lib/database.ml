@@ -3,7 +3,6 @@ open Tables
 
 module Database (Table : Table) = struct
   exception NoEntry
-  exception WrongType
   exception TableExists
 
   type table = Table.t

@@ -4,7 +4,8 @@ type types =
   | Ints
   | Chars
   | Bools
-  | Ids  (** Representation of the type of some field*)
+  | Ids 
+ (** Representation of the type of some field*)
 
 type comparison =
   | LT
@@ -12,7 +13,8 @@ type comparison =
   | EQ
   | NEQ
   | GT
-  | GTE  (** Representation of some comparison operation*)
+  | GTE  
+(** Representation of some comparison operation*)
 
 exception IndexExists
 (** [IndexExists] occurs when trying to replace an index which already exists*)

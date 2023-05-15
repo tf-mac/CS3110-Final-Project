@@ -335,7 +335,7 @@ module DatabaseTests (T : Table) = struct
         database_person_ent_list "Person" person_database;
       test_build_table "Testing Valid build_table on existing database"
         person_database database_airport_ent_list "Airport" large_database;
-      test_build_table_exception "Testing TableExists exception on build_table"
+      test_build_table_exception "Testing IndexExists exception on build_table"
         person_database database_person_ent_list "Person" PersonDB.TableExists;
       test_add_named_entry "Testing add_named_entry" "Person"
         [ ("name", String "location") ]

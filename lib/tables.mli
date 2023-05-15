@@ -26,15 +26,15 @@ module type Table = sig
   val table_to_string : t -> string
   (** [table_to_string t]  returns a string representation of [t]*)
 
-  (* Processes a given list of constraints
+  (** Processes a given list of constraints
      Raises [Not_found] if a constraint isn't found
      Raises [TypeMismatch] if the comparison value doesn't match the header*)
   val process_constraints : t -> (string * comparison * string) list -> string
 
-  (* Returns the header of the table*)
+  (** Returns the header of the table*)
   val header : t -> entry list
 
-  (* Returns the type of the named column, if it exists. If not, raises [TypeMismatch]*)
+  (** Returns the type of the named column, if it exists. If not, raises [TypeMismatch]*)
   val exists : t -> string -> types
 end
 

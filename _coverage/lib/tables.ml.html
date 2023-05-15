@@ -400,65 +400,65 @@
 <pre><code class="ocaml">open Utils
 
 let rec assert_types header a =
-  <span data-count="1099">m</span>atch header with
-  | <span data-count="148">[</span>] -&gt; if a = [] then <span data-count="148">[</span>] else raise TypeMismatch [@coverage off]
-  | <span data-count="951">h</span>d :: tl -&gt; (
+  <span data-count="1821">m</span>atch header with
+  | <span data-count="244">[</span>] -&gt; if a = [] then <span data-count="244">[</span>] else raise TypeMismatch [@coverage off]
+  | <span data-count="1577">h</span>d :: tl -&gt; (
       match a with
       | <span data-count="0">[</span>] -&gt; raise TypeMismatch
-      | <span data-count="951">b</span> :: c -&gt;
+      | <span data-count="1577">b</span> :: c -&gt;
           (match hd with
-          | <span data-count="274">S</span>ome (Type (_, Strings)) -&gt; (
+          | <span data-count="454">S</span>ome (Type (_, Strings)) -&gt; (
               match b with
-              | <span data-count="265">S</span>ome (String _) -&gt; b
-              | <span data-count="9">N</span>one -&gt; b
-              | <span data-count="0">_</span> -&gt; raise TypeMismatch)
-          | <span data-count="136">S</span>ome (Type (_, Floats)) -&gt; (
-              match b with
-              | <span data-count="124">S</span>ome (Float _) -&gt; b
-              | <span data-count="12">N</span>one -&gt; b
-              | <span data-count="0">_</span> -&gt; raise TypeMismatch)
-          | <span data-count="145">S</span>ome (Type (_, Ints)) -&gt; (
-              match b with
-              | <span data-count="128">S</span>ome (Int _) -&gt; b
-              | <span data-count="17">N</span>one -&gt; b
-              | <span data-count="0">_</span> -&gt; raise TypeMismatch)
-          | <span data-count="130">S</span>ome (Type (_, Bools)) -&gt; (
-              match b with
-              | <span data-count="115">S</span>ome (Bool _) -&gt; b
+              | <span data-count="439">S</span>ome (String _) -&gt; b
               | <span data-count="15">N</span>one -&gt; b
               | <span data-count="0">_</span> -&gt; raise TypeMismatch)
-          | <span data-count="130">S</span>ome (Type (_, Chars)) -&gt; (
+          | <span data-count="226">S</span>ome (Type (_, Floats)) -&gt; (
               match b with
-              | <span data-count="106">S</span>ome (Char _) -&gt; b
-              | <span data-count="24">N</span>one -&gt; b
+              | <span data-count="206">S</span>ome (Float _) -&gt; b
+              | <span data-count="20">N</span>one -&gt; b
               | <span data-count="0">_</span> -&gt; raise TypeMismatch)
-          | <span data-count="136">S</span>ome (Type (_, Ids)) -&gt; (
+          | <span data-count="239">S</span>ome (Type (_, Ints)) -&gt; (
               match b with
-              | <span data-count="13">S</span>ome (Id _) -&gt; b
-              | <span data-count="123">N</span>one -&gt; b
+              | <span data-count="212">S</span>ome (Int _) -&gt; b
+              | <span data-count="27">N</span>one -&gt; b
+              | <span data-count="0">_</span> -&gt; raise TypeMismatch)
+          | <span data-count="216">S</span>ome (Type (_, Bools)) -&gt; (
+              match b with
+              | <span data-count="191">S</span>ome (Bool _) -&gt; b
+              | <span data-count="25">N</span>one -&gt; b
+              | <span data-count="0">_</span> -&gt; raise TypeMismatch)
+          | <span data-count="216">S</span>ome (Type (_, Chars)) -&gt; (
+              match b with
+              | <span data-count="176">S</span>ome (Char _) -&gt; b
+              | <span data-count="40">N</span>one -&gt; b
+              | <span data-count="0">_</span> -&gt; raise TypeMismatch)
+          | <span data-count="226">S</span>ome (Type (_, Ids)) -&gt; (
+              match b with
+              | <span data-count="21">S</span>ome (Id _) -&gt; b
+              | <span data-count="205">N</span>one -&gt; b
               | <span data-count="0">_</span> -&gt; raise TypeMismatch)
           | <span data-count="0">_</span> -&gt; raise TypeMismatch)
-          :: assert_type<span data-count="951">s</span> tl c)
+          :: assert_type<span data-count="1577">s</span> tl c)
 
 let rec reorder_list (a : (string * entry) list) = function
-  | <span data-count="144">[</span>] -&gt; if a = [] then <span data-count="143">[</span>] else <span data-count="1">r</span>aise TypeMismatch
-  | <span data-count="927">S</span>ome (Type (name, v)) :: tl -&gt;
+  | <span data-count="238">[</span>] -&gt; if a = [] then <span data-count="237">[</span>] else <span data-count="1">r</span>aise TypeMismatch
+  | <span data-count="1541">S</span>ome (Type (name, v)) :: tl -&gt;
       let vl, rest =
         let rec extr_name acc = function
-          | <span data-count="202">[</span>] -&gt; (None, acc)
-          | <span data-count="2326">(</span>n, vr) :: rest -&gt;
-              if n = name then <span data-count="725">(</span>Some vr, acc @ rest)
-              else <span data-count="1601">e</span>xtr_name (acc @ [ (n, vr) ]) rest
+          | <span data-count="334">[</span>] -&gt; (None, acc)
+          | <span data-count="3874">(</span>n, vr) :: rest -&gt;
+              if n = name then <span data-count="1207">(</span>Some vr, acc @ rest)
+              else <span data-count="2667">e</span>xtr_name (acc @ [ (n, vr) ]) rest
         in
-        extr_nam<span data-count="927">e</span> [] a
+        extr_nam<span data-count="1541">e</span> [] a
       in
-      vl :: reorder_lis<span data-count="925">t</span> rest tl
+      vl :: reorder_lis<span data-count="1539">t</span> rest tl
   | <span data-count="0">_</span> -&gt; raise TypeMismatch
 
 let rec get_type_index cnt name = function
-  | <span data-count="3">[</span>] -&gt; raise Not_found
-  | <span data-count="90">T</span>ype (n, _) :: tl -&gt;
-      if n = name then <span data-count="24">c</span>nt else <span data-count="66">g</span>et_type_index (cnt + 1) name tl
+  | <span data-count="5">[</span>] -&gt; raise Not_found
+  | <span data-count="150">T</span>ype (n, _) :: tl -&gt;
+      if n = name then <span data-count="40">c</span>nt else <span data-count="110">g</span>et_type_index (cnt + 1) name tl
   | <span data-count="0">_</span> -&gt; raise TypeMismatch
 
 module type Table = sig
@@ -484,44 +484,44 @@ module HashTable = struct
     | None :: tl -&gt; raise (Failure "Deoptionize on none")
     [@@coverage off]
 
-  let header = function <span data-count="1237">H</span>ashTab (hd, _) -&gt; hd
-  let hshtable = function <span data-count="405">H</span>ashTab (_, hsh) -&gt; hsh
+  let header = function <span data-count="2047">H</span>ashTab (hd, _) -&gt; hd
+  let hshtable = function <span data-count="657">H</span>ashTab (_, hsh) -&gt; hsh
 
   let deoptionize = function
-    | <span data-count="143">S</span>ome x -&gt; x
+    | <span data-count="237">S</span>ome x -&gt; x
     | None -&gt; raise (Failure "Deoptionize on none") [@coverage off]
 
-  let rec optionize = function <span data-count="320">[</span>] -&gt; [] | <span data-count="2045">h</span>d :: tl -&gt; Some hd :: optioniz<span data-count="2045">e</span> tl
-  let empty (ex : entry list) = <span data-count="156">H</span>ashTab (ex, Hashtbl.creat<span data-count="156">e</span> 0)
+  let rec optionize = function <span data-count="524">[</span>] -&gt; [] | <span data-count="3381">h</span>d :: tl -&gt; Some hd :: optioniz<span data-count="3381">e</span> tl
+  let empty (ex : entry list) = <span data-count="258">H</span>ashTab (ex, Hashtbl.creat<span data-count="258">e</span> 0)
 
   let insert table entries =
-    <span data-count="6">m</span>atch Hashtbl.find_opt (hshtabl<span data-count="6">e</span> table) (List.h<span data-count="6">d</span> entries) with
+    <span data-count="8">m</span>atch Hashtbl.find_opt (hshtabl<span data-count="8">e</span> table) (List.h<span data-count="8">d</span> entries) with
     | <span data-count="1">S</span>ome x -&gt; raise IndexExists
-    | <span data-count="5">N</span>one -&gt;
-        let copy = Hashtbl.copy (hshtabl<span data-count="5">e</span> table) in
-        <span data-count="5">l</span>et entrs =
-          assert_types (optioniz<span data-count="5">e</span> (heade<span data-count="5">r</span> table)) (optioniz<span data-count="5">e</span> entries)
+    | <span data-count="7">N</span>one -&gt;
+        let copy = Hashtbl.copy (hshtabl<span data-count="7">e</span> table) in
+        <span data-count="7">l</span>et entrs =
+          assert_types (optioniz<span data-count="7">e</span> (heade<span data-count="7">r</span> table)) (optioniz<span data-count="7">e</span> entries)
         in
-        <span data-count="5">H</span>ashTab
-          ( heade<span data-count="5">r</span> table,
-            (Hashtbl.add copy (List.h<span data-count="5">d</span> entries) (List.t<span data-count="5">l</span> entrs);
-             <span data-count="5">c</span>opy) )
+        <span data-count="7">H</span>ashTab
+          ( heade<span data-count="7">r</span> table,
+            (Hashtbl.add copy (List.h<span data-count="7">d</span> entries) (List.t<span data-count="7">l</span> entrs);
+             <span data-count="7">c</span>opy) )
 
   let insert_named table entries =
-    <span data-count="145">l</span>et name, value = List.hd entries in
-    <span data-count="145">m</span>atch Hashtbl.find_opt (hshtabl<span data-count="145">e</span> table) value with
+    <span data-count="239">l</span>et name, value = List.hd entries in
+    <span data-count="239">m</span>atch Hashtbl.find_opt (hshtabl<span data-count="239">e</span> table) value with
     | <span data-count="1">S</span>ome x -&gt; raise IndexExists
-    | <span data-count="144">N</span>one -&gt;
-        let copy = Hashtbl.copy (hshtabl<span data-count="144">e</span> table) in
-        <span data-count="144">l</span>et reordered =
+    | <span data-count="238">N</span>one -&gt;
+        let copy = Hashtbl.copy (hshtabl<span data-count="238">e</span> table) in
+        <span data-count="238">l</span>et reordered =
           assert_types
-            (header table |&gt; <span data-count="143">o</span>ptioniz<span data-count="143">e</span>)
-            (reorder_lis<span data-count="143">t</span> entries (optioniz<span data-count="144">e</span> (heade<span data-count="144">r</span> table)))
+            (header table |&gt; <span data-count="237">o</span>ptioniz<span data-count="237">e</span>)
+            (reorder_lis<span data-count="237">t</span> entries (optioniz<span data-count="238">e</span> (heade<span data-count="238">r</span> table)))
         in
-        <span data-count="143">H</span>ashtbl.add copy (deoptioniz<span data-count="143">e</span> (List.h<span data-count="143">d</span> reordered)) (List.t<span data-count="143">l</span> reordered);
-        <span data-count="143">H</span>ashTab (heade<span data-count="143">r</span> table, copy)
+        <span data-count="237">H</span>ashtbl.add copy (deoptioniz<span data-count="237">e</span> (List.h<span data-count="237">d</span> reordered)) (List.t<span data-count="237">l</span> reordered);
+        <span data-count="237">H</span>ashTab (heade<span data-count="237">r</span> table, copy)
 
-  let at table id = <span data-count="57">S</span>ome id :: Hashtbl.fin<span data-count="44">d</span> (hshtabl<span data-count="57">e</span> table) id
+  let at table id = <span data-count="91">S</span>ome id :: Hashtbl.fin<span data-count="72">d</span> (hshtabl<span data-count="91">e</span> table) id
 
   let delete table id =
     <span data-count="2">l</span>et out = Hashtbl.copy (hshtabl<span data-count="2">e</span> table) in
@@ -529,51 +529,51 @@ module HashTable = struct
     <span data-count="2">H</span>ashTab (heade<span data-count="2">r</span> table, out)
 
   let rec table_to_string table =
-    <span data-count="23">H</span>ashtbl.fold
-      (fun id ent acc -&gt; <span data-count="20">a</span>cc ^ shorte<span data-count="20">n</span> (entry_to_strin<span data-count="20">g</span> id) ^ build_ro<span data-count="20">w</span> ent)
-      (hshtabl<span data-count="23">e</span> table)
-      (build_ro<span data-count="23">w</span> (optioniz<span data-count="23">e</span> (heade<span data-count="23">r</span> table)))
+    <span data-count="35">H</span>ashtbl.fold
+      (fun id ent acc -&gt; <span data-count="32">a</span>cc ^ shorte<span data-count="32">n</span> (entry_to_strin<span data-count="32">g</span> id) ^ build_ro<span data-count="32">w</span> ent)
+      (hshtabl<span data-count="35">e</span> table)
+      (build_ro<span data-count="35">w</span> (optioniz<span data-count="35">e</span> (heade<span data-count="35">r</span> table)))
 
   let rec process_constraints tbl lst =
-    <span data-count="42">l</span>et newHash = Hashtbl.create 0 in
-    <span data-count="42">m</span>atch lst with
-    | <span data-count="15">[</span>] -&gt; table_to_string tbl
-    | <span data-count="27">h</span>d :: tl -&gt;
+    <span data-count="70">l</span>et newHash = Hashtbl.create 0 in
+    <span data-count="70">m</span>atch lst with
+    | <span data-count="25">[</span>] -&gt; table_to_string tbl
+    | <span data-count="45">h</span>d :: tl -&gt;
         process_constraints
           (match hd with
-          | <span data-count="27">n</span>ame, cmp, vl -&gt;
-              let ind = get_type_index 0 name (heade<span data-count="27">r</span> tbl) in
-              <span data-count="24">l</span>et cmp_func =
+          | <span data-count="45">n</span>ame, cmp, vl -&gt;
+              let ind = get_type_index 0 name (heade<span data-count="45">r</span> tbl) in
+              <span data-count="40">l</span>et cmp_func =
                 match
                   List.find
                     (function
-                      | <span data-count="69">T</span>ype (n, t) -&gt; n = name | <span data-count="0">_</span> -&gt; failwith "Impossible")
-                    (heade<span data-count="24">r</span> tbl)
+                      | <span data-count="115">T</span>ype (n, t) -&gt; n = name | <span data-count="0">_</span> -&gt; failwith "Impossible")
+                    (heade<span data-count="40">r</span> tbl)
                 with
-                | <span data-count="24">T</span>ype (n, t) -&gt; (
-                    match process_entry vl t with <span data-count="21">e</span> -&gt; run_constrain<span data-count="21">t</span> cmp e)
+                | <span data-count="40">T</span>ype (n, t) -&gt; (
+                    match process_entry vl t with <span data-count="35">e</span> -&gt; run_constrain<span data-count="35">t</span> cmp e)
                 | <span data-count="0">_</span> -&gt; raise (Failure "Impossible")
               in
               Hashtbl.iter
                 (fun a b -&gt;
-                  <span data-count="36">i</span>f ind = 0 then
+                  <span data-count="60">i</span>f ind = 0 then
                     <span data-count="0">i</span>f cmp_func a then <span data-count="0">H</span>ashtbl.add newHash a b else <span data-count="0">(</span>)
                   else
-                    <span data-count="36">m</span>atch List.nth b (ind - 1) with
+                    <span data-count="60">m</span>atch List.nth b (ind - 1) with
                     | <span data-count="0">N</span>one -&gt; ()
-                    | <span data-count="36">S</span>ome v -&gt;
-                        if cmp_func v then <span data-count="21">H</span>ashtbl.add newHash a b else <span data-count="15">(</span>))
-                (hshtabl<span data-count="21">e</span> tbl);
-              <span data-count="21">H</span>ashTab (heade<span data-count="21">r</span> tbl, newHash))
+                    | <span data-count="60">S</span>ome v -&gt;
+                        if cmp_func v then <span data-count="35">H</span>ashtbl.add newHash a b else <span data-count="25">(</span>))
+                (hshtabl<span data-count="35">e</span> tbl);
+              <span data-count="35">H</span>ashTab (heade<span data-count="35">r</span> tbl, newHash))
           tl
 
   let exists table name =
-    <span data-count="551">l</span>et rec follow_header = function
-      | <span data-count="4">[</span>] -&gt; raise TypeMismatch
-      | <span data-count="2196">T</span>ype (n, t) :: tl when n = name -&gt; <span data-count="547">t</span>
-      | <span data-count="1649">_</span> :: tl -&gt; follow_header tl
+    <span data-count="917">l</span>et rec follow_header = function
+      | <span data-count="6">[</span>] -&gt; raise TypeMismatch
+      | <span data-count="3658">T</span>ype (n, t) :: tl when n = name -&gt; <span data-count="911">t</span>
+      | <span data-count="2747">_</span> :: tl -&gt; follow_header tl
     in
-    follow_header (heade<span data-count="551">r</span> table)
+    follow_header (heade<span data-count="917">r</span> table)
 end
 </code></pre>
       </div>
